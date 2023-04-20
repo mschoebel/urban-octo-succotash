@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>{{.Page.Title}}</title>
+    {{if .Page.Description}}<meta name="description" content="{{.Page.Description}}">{{end}}
+    {{if .Page.Author}}<meta name="author" content="{{.Page.Author}}">{{end}}
+
+    {{if .Page.FavIcon}}
+    <link rel="icon" href="{{.Page.StaticBaseURL}}{{.Page.FavIcon}}" type="image/x-icon"/>
+    <link rel="shortcut icon" href="{{.Page.StaticBaseURL}}{{.Page.FavIcon}}" type="image/x-icon"/>
+    {{end}}
+
+    {{range .Page.Styles}}
+    <link rel="stylesheet" href="{{if not (hasPrefix . "http")}}{{$.Page.StaticBaseURL}}{{end}}{{.}}">
+    {{end}}
+    {{range .Page.ScriptsHead}}
+    <script src="{{if not (hasPrefix . "http")}}{{$.Page.StaticBaseURL}}{{end}}{{.}}"></script>
+    {{end}}
+</head>
+<body>
+    <section id="content" class="section">
+        {{.Content}}
+    </section>
+
+    {{range .Page.ScriptsBody}}
+    <script src="{{if not (hasPrefix . "http")}}{{$.Page.StaticBaseURL}}{{end}}{{.}}"></script>
+    {{end}}
+</body>
+</html>
+

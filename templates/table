@@ -1,0 +1,97 @@
+<div id="{{.TableID}}">
+
+<div class="b-table {{if .IsLoading}}is-loading{{end}}">
+{{if .Display.IsMobileReady}}<div class="table-wrapper has-mobile-cards">{{end}}
+<table class="table {{if .Display.IsFullWidth}}is-fullwidth{{end}} {{if .Display.IsHoverable}}is-hoverable{{end}} {{if .Display.IsStriped}}is-striped{{end}}">
+  <thead>
+    <tr>
+{{if .Display.IsSelectable}}
+      <th class="is-checkbox-cell">
+        <label class="checkbox">
+          <input type="checkbox" value="false" {{if .IsEmpty}}disabled{{end}} />
+        </label>
+      </th>
+{{end}}
+{{range .Columns}}
+      <th class="{{if .IsSortField}}is-current-sort{{end}} {{if .IsSortable}}is-sortable{{end}}" {{if .IsSortable}}hx-get="{{$.TableBaseURL}}&page=1&sort={{if .IsSortField}}{{if not .IsSortDesc}}-{{end}}{{end}}{{.Name}}" hx-target="#{{$.TableID}}" hx-trigger="click" hx-swap="outerHTML"{{end}}>
+        {{.DisplayName}} {{if .IsSortField}}<i class="las la-sort-{{if .IsSortDesc}}down{{else}}up{{end}}" aria-hidden="true"></i>{{end}}
+      </th>
+{{end}}
+    </tr>
+  </thead>
+  <tbody>
+{{if .IsEmpty}}
+    <tr class="is-empty">
+      <td colspan="{{.ColumnWidth}}">
+        <section class="section">
+          <div class="content has-text-grey has-text-centered">
+            <p>Keine Daten.</p>
+          </div>
+        </section>
+      </td>
+    </tr>
+{{else}}
+{{range .Data}}
+    <tr>
+{{if $.Display.IsSelectable}}
+      <td class="is-checkbox-cell">
+        <label class="checkbox">
+          <input type="checkbox" class="selection" name="item-{{index . 0}}" />
+        </label>
+      </td>
+{{end}}
+{{range $idx, $entry := .}}
+      {{if ne $idx 0}}
+      <td data-label="{{index $.Config.Columns (dec $idx)}}">
+        {{$entry}}
+      </td>
+      {{end}}
+{{end}}
+    </tr>
+{{end}}
+{{end}}
+  </tbody>
+</table>
+{{if .Display.IsMobileReady}}</div>{{end}}
+</div>
+
+<div class="level mt-5">
+  <div class="level-left">
+    <div class="level-item">
+{{if .HasActions}}
+{{range .Actions}}
+      <button class="button is-{{.ButtonClass}} is-small mr-2" hx-{{.Method}}="{{.TargetURL}}" {{if ne .Include ""}}hx-include="{{.Include}}"{{end}} {{if hasPrefix .TargetURL "/dialogs/"}}hx-target="body" hx-swap="beforeend"{{end}}>
+        {{if ne .Icon ""}}<span class="icon"><i class="las la-{{.Icon}}"></i></span>{{end}}
+        {{if ne .Text ""}}<span>{{.Text}}</span>{{end}}
+      </button>
+{{end}}
+{{end}}
+    </div>
+  </div>
+  <div class="level-right">
+{{if ne .PageCount 1}}
+    <div class="level-item">
+      <button type="button" class="button is-small mr-2" {{if eq $.Config.Page 1}}disabled{{else}}hx-get="{{$.TableBaseURL}}&page={{dec $.Config.Page}}{{if $.Config.SortColumn}}&sort={{if eq $.Config.SortMode "DESC"}}-{{end}}{{$.Config.SortColumn}}{{end}}" hx-target="#{{$.TableID}}" hx-trigger="click" hx-swap="outerHTML"{{end}}>
+        <i class="las la-angle-left" aria-hidden="true"></i>
+      </button>
+      <small>Page</small>
+      <div class="control">
+        <div class="select is-small mr-1 ml-1">
+          <select name="page" hx-get="{{$.TableBaseURL}}{{if $.Config.SortColumn}}&sort={{if eq $.Config.SortMode "DESC"}}-{{end}}{{$.Config.SortColumn}}{{end}}" hx-target="#{{.TableID}}" hx-trigger="change" hx-swap="outerHTML">
+{{range $p := loop 1 .PageCount}}
+            <option value="{{$p}}" {{if eq $p $.Config.Page}}selected="selected"{{end}}>{{$p}}</option>
+{{end}}
+          </select>
+        </div>
+      </div>
+      <small>of {{.PageCount}}</small>
+      <button type="button" class="button is-small ml-2" {{if eq $.Config.Page .PageCount}}disabled{{else}}hx-get="{{$.TableBaseURL}}&page={{inc $.Config.Page}}{{if $.Config.SortColumn}}&sort={{if eq $.Config.SortMode "DESC"}}-{{end}}{{$.Config.SortColumn}}{{end}}" hx-target="#{{$.TableID}}" hx-trigger="click" hx-swap="outerHTML"{{end}}>
+        <i class="las la-angle-right" aria-hidden="true"></i>
+      </button>
+    </div>
+{{end}}
+  </div>
+</div>
+
+</div>
+

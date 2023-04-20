@@ -1,0 +1,5 @@
+<article class="message is-{{.Class}} mt-2">
+  <div class="message-body p-2">
+    {{.Message}}
+  </div>
+</article>

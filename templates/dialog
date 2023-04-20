@@ -1,0 +1,35 @@
+<div id="modal" class="modal is-active" _="on closeModal remove me">
+  <div class="modal-background"></div>
+  <div class="modal-card">
+    <header class="modal-card-head">
+      <p class="modal-card-title">{{.Title}}</p>
+    </header>
+    <section class="modal-card-body">
+      {{.Content}}
+    </section>
+    <footer class="modal-card-foot is-block">
+      {{if ge (len .FooterLeft) 1}}
+      <span class="is-pulled-left">
+        {{range .FooterLeft}}
+          {{if .IsButton}}
+          <button class="button is-{{.TextClass}} is-small" {{if .IsClosing}}_="on click trigger closeModal"{{end}} {{if .IsSaving}}hx-post="/forms/{{.Form}}?dialog=true" hx-include="#{{.Form}}" hx-target="#{{.Form}}"{{end}}>{{.Text}}</button>
+          {{else}}
+          <span class="has-text-{{.TextClass}}">{{.Text}}</span>
+          {{end}}
+        {{end}}
+      </span>
+      {{end}}
+      {{if ge (len .FooterRight) 1}}
+      <span class="is-pulled-right">
+        {{range .FooterRight}}
+          {{if .IsButton}}
+          <button class="button is-{{.TextClass}} is-small" {{if .IsClosing}}_="on click trigger closeModal"{{end}} {{if .IsSaving}}hx-post="/forms/{{.Form}}?dialog=true" hx-include="#{{.Form}}" hx-target="#{{.Form}}"{{end}}>{{.Text}}</button>
+          {{else}}
+          {{end}}
+        {{end}}
+      </span>
+      {{end}}
+    </footer>
+  </div>
+</div>
+

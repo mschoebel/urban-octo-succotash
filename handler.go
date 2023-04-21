@@ -19,7 +19,7 @@ type AppRequestHandlerMapping struct {
 // RegisterAppRequestHandler registers the given handler for a specific URL pattern/path.
 func RegisterAppRequestHandler(pattern string, handler AppRequestHandler) {
 	LogDebugContext("register request handler", LogContext{"pattern": pattern})
-	http.Handle(pattern, mwWrapF(handler))
+	appMux.Handle(pattern, mwWrapF(handler))
 }
 
 // RegisterAppRequesHandlers registers a list of handler.
@@ -38,5 +38,5 @@ func RegisterStaticAssets(route string, content embed.FS) {
 		"register static assets server",
 		LogContext{"route": route},
 	)
-	http.Handle(route, http.FileServer(http.FS(content)))
+	appMux.Handle(route, http.FileServer(http.FS(content)))
 }

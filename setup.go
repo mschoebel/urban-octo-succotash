@@ -24,6 +24,7 @@ func ComponentSetup(configFilePath ...string) {
 	}
 
 	setupLogging()
+	setupMonitoring()
 	setupDataAccess()
 	setupAuthentication()
 

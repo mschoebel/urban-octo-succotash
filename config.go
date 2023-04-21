@@ -12,9 +12,10 @@ type AppConfiguration struct {
 	// web application port
 	Port int `json:"port"`
 
-	Logging  LogConfiguration   `json:"logging"`
-	Database DBConfiguration    `json:"database"`
-	Assets   AssetConfiguration `json:"assets"`
+	Logging    LogConfiguration        `json:"logging"`
+	Monitoring MonitoringConfiguration `json:"monitoring"`
+	Database   DBConfiguration         `json:"database"`
+	Assets     AssetConfiguration      `json:"assets"`
 
 	Auth AuthenticationConfiguration `json:"auth"`
 
@@ -29,6 +30,14 @@ type LogConfiguration struct {
 	Level string `json:"level"`
 	// write logmessages as colored output to stderr - otherwise log as JSON
 	UseConsole bool `json:"use_console"`
+}
+
+// MonitoringConfiguration specifies ports for application monitoring.
+type MonitoringConfiguration struct {
+	// port for pprof web interface
+	PortPPROF int `json:"pprof"`
+	// port for application metrics (Prometheus)
+	PortMetrics int `json:"metrics"`
 }
 
 // DBConfiguration specifies the database.

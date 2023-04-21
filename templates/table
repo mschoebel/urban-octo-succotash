@@ -8,7 +8,7 @@
 {{if .Display.IsSelectable}}
       <th class="is-checkbox-cell">
         <label class="checkbox">
-          <input type="checkbox" value="false" {{if .IsEmpty}}disabled{{end}} />
+          <input id="select-all-{{.TableID}}" type="checkbox" value="false" {{if .IsEmpty}}disabled{{end}} _="on change set .select-{{.TableID}}.checked to me.checked" />
         </label>
       </th>
 {{end}}
@@ -36,7 +36,7 @@
 {{if $.Display.IsSelectable}}
       <td class="is-checkbox-cell">
         <label class="checkbox">
-          <input type="checkbox" class="selection" name="item-{{index . 0}}" />
+          <input type="checkbox" class="selection select-{{$.TableID}}" name="item-{{index . 0}}" _="on change if not me.checked then set #select-all-{{$.TableID}}.checked to false" />
         </label>
       </td>
 {{end}}

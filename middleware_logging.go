@@ -36,14 +36,25 @@ func mwLogging(next http.Handler) http.Handler {
 					"url":    r.URL.Path,
 				},
 			)
+			Metrics.GaugeInc(mRequestActive)
+			Metrics.CounterInc(mRequestCount)
+
 			next.ServeHTTP(lrw, r)
+			duration := time.Since(startTime)
+
+			Metrics.GaugeDec(mRequestActive)
+			Metrics.CounterIncValueCondition(mRequestDuration, duration.Milliseconds(), lrw.statusCode < 500)
+			Metrics.CounterIncCondition(mRequestFailed, lrw.statusCode >= 500)
+			Metrics.CounterIncCondition(mRequestSlow, duration >= 2*time.Second)
+
 			Log.InfoContext(
 				"done request",
 				LogContext{
-					"duration": time.Since(startTime),
+					"duration": duration,
 					"method":   r.Method,
 					"url":      r.URL.Path,
 					"status":   lrw.statusCode,
+					"slow":     duration >= 2*time.Second,
 				},
 			)
 		},

@@ -107,26 +107,35 @@ func appendLogContext(l *zerolog.Event, message string, context LogContext) {
 
 // PanicContext logs the specified message and context at log level 'panic'.
 func (internalLogger) PanicContext(message string, context LogContext) {
+	Metrics.CounterInc(mLogMessage)
+	Metrics.CounterInc(mLogMessagePanic)
 	appendLogContext(log.Panic(), message, context)
 }
 
 // FatalContext logs the specified message and context at log level 'fatal'.
 func (internalLogger) FatalContext(message string, context LogContext) {
+	Metrics.CounterInc(mLogMessage)
+	Metrics.CounterInc(mLogMessagePanic)
 	appendLogContext(log.Fatal(), message, context)
 }
 
 // ErrorContext logs the specified message and context at log level 'error'.
 func (internalLogger) ErrorContext(message string, context LogContext) {
+	Metrics.CounterInc(mLogMessage)
+	Metrics.CounterInc(mLogMessageError)
 	appendLogContext(log.Error(), message, context)
 }
 
 // WarnContext logs the specified message and context at log level 'warning'.
 func (internalLogger) WarnContext(message string, context LogContext) {
+	Metrics.CounterInc(mLogMessage)
+	Metrics.CounterInc(mLogMessageWarning)
 	appendLogContext(log.Warn(), message, context)
 }
 
 // InfoContext logs the specified message and context at log level 'info'.
 func (internalLogger) InfoContext(message string, context LogContext) {
+	Metrics.CounterInc(mLogMessage)
 	appendLogContext(log.Info(), message, context)
 }
 

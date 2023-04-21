@@ -11,10 +11,10 @@ var appMux = http.NewServeMux()
 // Starts handling requests at the configured port. Blocks.
 // Panics if anything fails.
 func StartApp() {
-	LogInfoContext("start listening", LogContext{"port": config.Port})
+	Log.InfoContext("start listening", LogContext{"port": config.Port})
 
 	err := http.ListenAndServe(fmt.Sprintf(":%d", config.Port), appMux)
 	if err != nil {
-		LogPanicError("application error", err)
+		Log.PanicError("application error", err)
 	}
 }

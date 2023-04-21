@@ -32,13 +32,13 @@ func getFragmentHandlerFunc(fragments []FragmentSpec) AppRequestHandler {
 	nameToSpec := map[string]FragmentSpec{}
 	for _, f := range fragments {
 		nameToSpec[f.Name()] = f
-		LogDebugContext("register fragment spec", LogContext{"name": f.Name()})
+		Log.DebugContext("register fragment spec", LogContext{"name": f.Name()})
 	}
 
 	return func(w http.ResponseWriter, r *http.Request) {
 		// determine fragment
 		fragmentName := getElementName("fragments", r.URL.Path)
-		LogDebugContext(
+		Log.DebugContext(
 			"handle fragment",
 			LogContext{
 				"name":   fragmentName,
@@ -49,7 +49,7 @@ func getFragmentHandlerFunc(fragments []FragmentSpec) AppRequestHandler {
 		// prepare request processing
 		err := r.ParseForm()
 		if err != nil {
-			LogWarnError("could not parse form", err)
+			Log.WarnError("could not parse form", err)
 			RespondBadRequest(w)
 			return
 		}
@@ -57,7 +57,7 @@ func getFragmentHandlerFunc(fragments []FragmentSpec) AppRequestHandler {
 		fragmentSpec, ok := nameToSpec[fragmentName]
 		if !ok {
 			// might be fragment without specification -> directly forward to rendering
-			LogDebugContext("handle fragment without spec", LogContext{"name": fragmentName})
+			Log.DebugContext("handle fragment without spec", LogContext{"name": fragmentName})
 			renderObjectFragment(w, r, fragmentName, r.Form.Get("p"))
 			return
 		}
@@ -97,7 +97,7 @@ func handleFragmentError(w http.ResponseWriter, message string, err error) {
 	}
 
 	// all other cases: log as internal error
-	LogErrorObj(message, err)
+	Log.ErrorObj(message, err)
 	RespondInternalServerError(w)
 }
 
@@ -123,7 +123,7 @@ func renderFragment(w http.ResponseWriter, r *http.Request, name string, data ma
 	// render fragment
 	err := tmpl.ExecuteTemplate(w, name, data)
 	if err != nil {
-		LogErrorContext(
+		Log.ErrorContext(
 			"could not execute fragment template",
 			LogContext{
 				"fragment": name,

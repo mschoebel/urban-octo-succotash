@@ -15,7 +15,7 @@ import (
 var DB *gorm.DB
 
 func setupDataAccess() {
-	LogInfoContext("open SQLite database file", LogContext{"file": config.Database.File})
+	Log.InfoContext("open SQLite database file", LogContext{"file": config.Database.File})
 
 	dbAccess, err := gorm.Open(
 		sqlite.Open(config.Database.File),
@@ -24,11 +24,11 @@ func setupDataAccess() {
 		},
 	)
 	if err != nil {
-		LogPanicError("could not initialize data access", err)
+		Log.PanicError("could not initialize data access", err)
 	}
 	DB = dbAccess
 
-	LogInfo("register framework models")
+	Log.Info("register framework models")
 	RegisterDBModels(
 		AppUser{},
 	)
@@ -45,7 +45,7 @@ func RegisterDBModels(models ...interface{}) {
 	// migrate
 	err := DB.AutoMigrate(models...)
 	if err != nil {
-		LogPanicError("DB models auto-migration failed", err)
+		Log.PanicError("DB models auto-migration failed", err)
 	}
 
 	// analyze
@@ -66,7 +66,7 @@ var dbModelInfos = map[string]dbModelInfo{}
 func analyzeModel(model interface{}) {
 	s, err := schema.Parse(model, &sync.Map{}, schema.NamingStrategy{})
 	if err != nil {
-		LogPanicError("could not analyze DB model", err)
+		Log.PanicError("could not analyze DB model", err)
 	}
 
 	info := dbModelInfo{
@@ -80,7 +80,7 @@ func analyzeModel(model interface{}) {
 		info.columnMap[field.DBName] = field.Name
 	}
 
-	LogDebugContext("analyzed DB model", LogContext{"name": s.Name, "columns": info.columns})
+	Log.DebugContext("analyzed DB model", LogContext{"name": s.Name, "columns": info.columns})
 	dbModelInfos[s.Name] = info
 }
 
@@ -99,12 +99,12 @@ func dbEntryCount(name string) (int64, error) {
 func DBExtract(name string, models interface{}, columns []string) TableData {
 	info, ok := dbModelInfos[name]
 	if !ok {
-		LogPanicContext("model not registered", LogContext{"name": name})
+		Log.PanicContext("model not registered", LogContext{"name": name})
 	}
 
 	list := reflect.ValueOf(models)
 	if list.Kind() != reflect.Slice {
-		LogPanic("invalid call to DBExtract - models must be a slice")
+		Log.Panic("invalid call to DBExtract - models must be a slice")
 	}
 
 	table := make([][]interface{}, list.Len())
@@ -127,7 +127,7 @@ func DBExtract(name string, models interface{}, columns []string) TableData {
 func DBExtractForm(name string, model interface{}, items FormItems) FormItems {
 	info, ok := dbModelInfos[name]
 	if !ok {
-		LogPanicContext("model not registered", LogContext{"name": name})
+		Log.PanicContext("model not registered", LogContext{"name": name})
 	}
 
 	for pos, i := range items {

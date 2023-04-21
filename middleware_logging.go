@@ -28,7 +28,7 @@ func mwLogging(next http.Handler) http.Handler {
 				lrw       = newLoggingResponseWriter(w)
 			)
 
-			LogInfoContext(
+			Log.InfoContext(
 				"received request",
 				LogContext{
 					"time":   startTime,
@@ -37,7 +37,7 @@ func mwLogging(next http.Handler) http.Handler {
 				},
 			)
 			next.ServeHTTP(lrw, r)
-			LogInfoContext(
+			Log.InfoContext(
 				"done request",
 				LogContext{
 					"duration": time.Since(startTime),

@@ -65,7 +65,7 @@ func passwordSalt() []byte {
 	salt := make([]byte, 16)
 	_, err := rand.Read(salt)
 	if err != nil {
-		LogWarnError("could not generate salt", err)
+		Log.WarnError("could not generate salt", err)
 		return nil
 	}
 
@@ -75,7 +75,7 @@ func passwordSalt() []byte {
 func passwordHash(password string, salt []byte) string {
 	hash, err := scrypt.Key([]byte(password), salt, 32768, 8, 1, 32)
 	if err != nil {
-		LogWarnError("could not generate password hash", err)
+		Log.WarnError("could not generate password hash", err)
 		return ""
 	}
 

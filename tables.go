@@ -104,13 +104,13 @@ func getTableHandlerFunc(tables []TableSpec) AppRequestHandler {
 	nameToSpec := map[string]TableSpec{}
 	for _, t := range tables {
 		nameToSpec[t.Name()] = t
-		LogDebugContext("register table spec", LogContext{"name": t.Name()})
+		Log.DebugContext("register table spec", LogContext{"name": t.Name()})
 	}
 
 	return func(w http.ResponseWriter, r *http.Request) {
 		// determine table
 		tableName := getElementName("tables", r.URL.Path)
-		LogDebugContext(
+		Log.DebugContext(
 			"handle table",
 			LogContext{
 				"name":   tableName,
@@ -127,7 +127,7 @@ func getTableHandlerFunc(tables []TableSpec) AppRequestHandler {
 		// prepare request processing (URL form data might be empty)
 		err := r.ParseForm()
 		if err != nil {
-			LogWarnError("could not parse form", err)
+			Log.WarnError("could not parse form", err)
 			RespondBadRequest(w)
 			return
 		}
@@ -434,7 +434,7 @@ func renderTable(w http.ResponseWriter, r *http.Request, t TableSpec, form url.V
 
 	err = renderInternalTemplate(w, r, "table", context)
 	if err != nil {
-		LogErrorContext(
+		Log.ErrorContext(
 			"could not render table",
 			LogContext{"name": t.Name(), "error": err},
 		)
@@ -451,6 +451,6 @@ func handleTableError(w http.ResponseWriter, message string, err error) {
 	}
 
 	// all other cases: log error and respond
-	LogErrorObj(message, err)
+	Log.ErrorObj(message, err)
 	RespondInternalServerError(w)
 }

@@ -40,7 +40,7 @@ func PageHandler(page ...string) AppRequestHandlerMapping {
 
 			err := r.ParseForm()
 			if err != nil {
-				LogWarnError("could not parse form", err)
+				Log.WarnError("could not parse form", err)
 				RespondBadRequest(w)
 				return
 			}
@@ -64,7 +64,7 @@ func renderPage(w http.ResponseWriter, r *http.Request, name string, data map[st
 	var content bytes.Buffer
 	err := renderTemplate(&content, r, name, data, pageTemplateName)
 	if err != nil {
-		LogErrorContext(
+		Log.ErrorContext(
 			"could not render page content template",
 			LogContext{"name": name, "error": err},
 		)
@@ -81,7 +81,7 @@ func renderPage(w http.ResponseWriter, r *http.Request, name string, data map[st
 
 	err = renderInternalTemplate(w, r, "page", data)
 	if err != nil {
-		LogErrorContext(
+		Log.ErrorContext(
 			"could not render page",
 			LogContext{"name": name, "error": err},
 		)

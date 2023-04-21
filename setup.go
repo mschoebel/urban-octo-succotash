@@ -30,13 +30,13 @@ func ComponentSetup(configFilePath ...string) {
 
 	rand.Seed(time.Now().UnixNano())
 
-	LogInfo("framework initialized")
+	Log.Info("framework initialized")
 }
 
 // ComponentCleanup frees all initializes framework resources.
 // Should be called on program termination, eg. in a defer call.
 func ComponentCleanup() {
-	LogInfo("framework cleanup")
+	Log.Info("framework cleanup")
 
 	cleanupDataAccess()
 }

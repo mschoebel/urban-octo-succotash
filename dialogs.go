@@ -91,13 +91,13 @@ func getDialogHandlerFunc(dialogs []DialogSpec) AppRequestHandler {
 	nameToSpec := map[string]DialogSpec{}
 	for _, d := range dialogs {
 		nameToSpec[d.Name()] = d
-		LogDebugContext("register dialog spec", LogContext{"name": d.Name()})
+		Log.DebugContext("register dialog spec", LogContext{"name": d.Name()})
 	}
 
 	return func(w http.ResponseWriter, r *http.Request) {
 		// determine dialog
 		dialogName := getElementName("dialogs", r.URL.Path)
-		LogDebugContext(
+		Log.DebugContext(
 			"handle dialog",
 			LogContext{
 				"name":   dialogName,
@@ -114,7 +114,7 @@ func getDialogHandlerFunc(dialogs []DialogSpec) AppRequestHandler {
 		// prepare request processing (URL form data might be empty)
 		err := r.ParseForm()
 		if err != nil {
-			LogWarnError("could not parse form", err)
+			Log.WarnError("could not parse form", err)
 			RespondBadRequest(w)
 			return
 		}
@@ -136,7 +136,7 @@ func renderDialog(w http.ResponseWriter, r *http.Request, name string, spec Dial
 	var content bytes.Buffer
 	err := renderTemplate(&content, r, name, map[string]string{"ID": id}, dialogTemplateName)
 	if err != nil {
-		LogErrorContext(
+		Log.ErrorContext(
 			"could not render page content template",
 			LogContext{"name": name, "error": err},
 		)
@@ -156,7 +156,7 @@ func renderDialog(w http.ResponseWriter, r *http.Request, name string, spec Dial
 
 	err = renderInternalTemplate(w, r, "dialog", data)
 	if err != nil {
-		LogErrorContext(
+		Log.ErrorContext(
 			"could not render dialog",
 			LogContext{"name": name, "error": err},
 		)

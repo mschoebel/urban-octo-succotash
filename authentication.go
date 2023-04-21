@@ -11,7 +11,7 @@ import (
 var cookieHandler *securecookie.SecureCookie
 
 func setupAuthentication() {
-	LogInfoContext(
+	Log.InfoContext(
 		"initialize authentication",
 		LogContext{
 			"hash":  len(config.Auth.hash),
@@ -35,14 +35,14 @@ func setSession(userID uint, w http.ResponseWriter) {
 
 	valueBytes, err := json.Marshal(session)
 	if err != nil {
-		LogErrorObj("could not encode session info as JSON", err)
+		Log.ErrorObj("could not encode session info as JSON", err)
 		return
 	}
 	value := string(valueBytes)
 
 	encoded, err := cookieHandler.Encode("session", value)
 	if err != nil {
-		LogErrorObj("could not encode session cookie", err)
+		Log.ErrorObj("could not encode session cookie", err)
 		return
 	}
 

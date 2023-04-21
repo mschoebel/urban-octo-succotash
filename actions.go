@@ -29,13 +29,13 @@ func getActionHandlerFunc(actions []ActionSpec) AppRequestHandler {
 	}
 	for _, a := range actions {
 		nameToSpec[a.Name()] = a
-		LogDebugContext("register action spec", LogContext{"name": a.Name()})
+		Log.DebugContext("register action spec", LogContext{"name": a.Name()})
 	}
 
 	return func(w http.ResponseWriter, r *http.Request) {
 		// determine action
 		actionName := getElementName("actions", r.URL.Path)
-		LogDebugContext(
+		Log.DebugContext(
 			"handle action",
 			LogContext{
 				"name":   actionName,
@@ -52,12 +52,12 @@ func getActionHandlerFunc(actions []ActionSpec) AppRequestHandler {
 		// prepare request processing (URL form data might be empty)
 		err := r.ParseForm()
 		if err != nil {
-			LogWarnError("could not parse form", err)
+			Log.WarnError("could not parse form", err)
 			RespondBadRequest(w)
 			return
 		}
 
-		LogInfoContext("execute action", LogContext{"name": actionName, "method": r.Method})
+		Log.InfoContext("execute action", LogContext{"name": actionName, "method": r.Method})
 		handleResponseAction(w, r, actionSpec.Do(w, r))
 	}
 }

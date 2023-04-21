@@ -42,7 +42,7 @@ func markdownHandler(w http.ResponseWriter, r *http.Request) {
 	info, err := os.Stat(mdFilePath)
 	if err != nil {
 		if os.IsNotExist(err) {
-			LogWarnContext(
+			Log.WarnContext(
 				"file not found",
 				LogContext{"file": mdFilePath},
 			)
@@ -50,7 +50,7 @@ func markdownHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		LogErrorContext(
+		Log.ErrorContext(
 			"could not os.Stat markdown file",
 			LogContext{
 				"file":  mdFilePath,
@@ -70,7 +70,7 @@ func markdownHandler(w http.ResponseWriter, r *http.Request) {
 	// read markdown file
 	md, err := ioutil.ReadFile(mdFilePath)
 	if err != nil {
-		LogErrorContext(
+		Log.ErrorContext(
 			"could not read markdown file",
 			LogContext{
 				"file":  mdFilePath,

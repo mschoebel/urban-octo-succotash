@@ -107,7 +107,7 @@ func loadTemplate(
 	info, err := os.Stat(templatePath)
 	if err != nil {
 		if os.IsNotExist(err) {
-			LogWarnContext(
+			Log.WarnContext(
 				"file not found",
 				LogContext{"file": templatePath},
 			)
@@ -115,7 +115,7 @@ func loadTemplate(
 			return nil
 		}
 
-		LogErrorContext(
+		Log.ErrorContext(
 			"could not os.Stat template file",
 			LogContext{
 				"file":  templatePath,
@@ -135,7 +135,7 @@ func loadTemplate(
 	// load template
 	templateFile, err := os.ReadFile(templatePath)
 	if err != nil {
-		LogErrorContext(
+		Log.ErrorContext(
 			"could not read template file",
 			LogContext{
 				"file":  templatePath,
@@ -150,7 +150,7 @@ func loadTemplate(
 	// parse template
 	tmpl, err := template.New("").Funcs(getTemplateFuncMap(r)).Parse(templateString)
 	if err != nil {
-		LogErrorContext(
+		Log.ErrorContext(
 			"could not parse template file",
 			LogContext{
 				"file":  templatePath,

@@ -10,6 +10,11 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+type internalLogger struct{}
+
+// Log provides the application logger
+var Log *internalLogger
+
 func setupLogging() {
 	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
 
@@ -35,6 +40,8 @@ func setupLogging() {
 	default:
 		zerolog.SetGlobalLevel(zerolog.DebugLevel)
 	}
+
+	Log = &internalLogger{}
 }
 
 // LogContext specifies key-value context information for a log entry.
@@ -98,103 +105,103 @@ func appendLogContext(l *zerolog.Event, message string, context LogContext) {
 	l.Msg(message)
 }
 
-// LogPanicContext logs the specified message and context at log level 'panic'.
-func LogPanicContext(message string, context LogContext) {
+// PanicContext logs the specified message and context at log level 'panic'.
+func (internalLogger) PanicContext(message string, context LogContext) {
 	appendLogContext(log.Panic(), message, context)
 }
 
-// LogFatalContext logs the specified message and context at log level 'fatal'.
-func LogFatalContext(message string, context LogContext) {
+// FatalContext logs the specified message and context at log level 'fatal'.
+func (internalLogger) FatalContext(message string, context LogContext) {
 	appendLogContext(log.Fatal(), message, context)
 }
 
-// LogErrorContext logs the specified message and context at log level 'error'.
-func LogErrorContext(message string, context LogContext) {
+// ErrorContext logs the specified message and context at log level 'error'.
+func (internalLogger) ErrorContext(message string, context LogContext) {
 	appendLogContext(log.Error(), message, context)
 }
 
-// LogWarnContext logs the specified message and context at log level 'warning'.
-func LogWarnContext(message string, context LogContext) {
+// WarnContext logs the specified message and context at log level 'warning'.
+func (internalLogger) WarnContext(message string, context LogContext) {
 	appendLogContext(log.Warn(), message, context)
 }
 
-// LogInfoContext logs the specified message and context at log level 'info'.
-func LogInfoContext(message string, context LogContext) {
+// InfoContext logs the specified message and context at log level 'info'.
+func (internalLogger) InfoContext(message string, context LogContext) {
 	appendLogContext(log.Info(), message, context)
 }
 
-// LogDebugContext logs the specified message and context at log level 'debug'.
-func LogDebugContext(message string, context LogContext) {
+// DebugContext logs the specified message and context at log level 'debug'.
+func (internalLogger) DebugContext(message string, context LogContext) {
 	appendLogContext(log.Debug(), message, context)
 }
 
-// LogTraceContext logs the specified message and context at log level 'trace'.
-func LogTraceContext(message string, context LogContext) {
+// TraceContext logs the specified message and context at log level 'trace'.
+func (internalLogger) TraceContext(message string, context LogContext) {
 	appendLogContext(log.Trace(), message, context)
 }
 
-// LogPanic logs the specified message at log level 'panic'.
-func LogPanic(message string) {
-	LogPanicContext(message, nil)
+// Panic logs the specified message at log level 'panic'.
+func (l *internalLogger) Panic(message string) {
+	l.PanicContext(message, nil)
 }
 
-// LogFatal logs the specified message at log level 'fatal'.
-func LogFatal(message string) {
-	LogFatalContext(message, nil)
+// Fatal logs the specified message at log level 'fatal'.
+func (l *internalLogger) Fatal(message string) {
+	l.FatalContext(message, nil)
 }
 
-// LogError logs the specified message at log level 'error'.
-func LogError(message string) {
-	LogErrorContext(message, nil)
+// Error logs the specified message at log level 'error'.
+func (l *internalLogger) Error(message string) {
+	l.ErrorContext(message, nil)
 }
 
-// LogWarn logs the specified message at log level 'warning'.
-func LogWarn(message string) {
-	LogWarnContext(message, nil)
+// Warn logs the specified message at log level 'warning'.
+func (l *internalLogger) Warn(message string) {
+	l.WarnContext(message, nil)
 }
 
-// LogInfo logs the specified message at log level 'info'.
-func LogInfo(message string) {
-	LogInfoContext(message, nil)
+// Info logs the specified message at log level 'info'.
+func (l *internalLogger) Info(message string) {
+	l.InfoContext(message, nil)
 }
 
-// LogDebug logs the specified message at log level 'debug'.
-func LogDebug(message string) {
-	LogDebugContext(message, nil)
+// Debug logs the specified message at log level 'debug'.
+func (l *internalLogger) Debug(message string) {
+	l.DebugContext(message, nil)
 }
 
-// LogTrace logs the specified message at log level 'trace'.
-func LogTrace(message string) {
-	LogTraceContext(message, nil)
+// Trace logs the specified message at log level 'trace'.
+func (l *internalLogger) Trace(message string) {
+	l.TraceContext(message, nil)
 }
 
-// LogPanicError logs the specified message and error at log level 'panic'. Panics.
-func LogPanicError(message string, err error) {
-	LogPanicContext(message, errorLogContext(err))
+// PanicError logs the specified message and error at log level 'panic'. Panics.
+func (l *internalLogger) PanicError(message string, err error) {
+	l.PanicContext(message, errorLogContext(err))
 	panic(message)
 }
 
-// LogFatalError logs the specified message and error at log level 'fatal'.
-func LogFatalError(message string, err error) {
-	LogFatalContext(message, errorLogContext(err))
+// FatalError logs the specified message and error at log level 'fatal'.
+func (l *internalLogger) FatalError(message string, err error) {
+	l.FatalContext(message, errorLogContext(err))
 }
 
-// LogErrorObj logs the specified message and error at log level 'error'.
-func LogErrorObj(message string, err error) {
-	LogErrorContext(message, errorLogContext(err))
+// ErrorObj logs the specified message and error at log level 'error'.
+func (l *internalLogger) ErrorObj(message string, err error) {
+	l.ErrorContext(message, errorLogContext(err))
 }
 
-// LogWarn logs the specified message at and error log level 'warning'.
-func LogWarnError(message string, err error) {
-	LogWarnContext(message, errorLogContext(err))
+// Warn logs the specified message at and error log level 'warning'.
+func (l *internalLogger) WarnError(message string, err error) {
+	l.WarnContext(message, errorLogContext(err))
 }
 
-// LogInfo logs the specified message at and error log level 'info'.
-func LogInfoError(message string, err error) {
-	LogInfoContext(message, errorLogContext(err))
+// Info logs the specified message at and error log level 'info'.
+func (l *internalLogger) InfoError(message string, err error) {
+	l.InfoContext(message, errorLogContext(err))
 }
 
-// LogDebug logs the specified message and error at log level 'debug'.
-func LogDebugError(message string, err error) {
-	LogDebugContext(message, errorLogContext(err))
+// Debug logs the specified message and error at log level 'debug'.
+func (l *internalLogger) DebugError(message string, err error) {
+	l.DebugContext(message, errorLogContext(err))
 }

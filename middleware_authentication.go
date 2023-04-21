@@ -16,7 +16,7 @@ func mwAuthentication(next http.Handler) http.Handler {
 			// read session cookie
 			cookie, err := r.Cookie("session")
 			if err != nil {
-				LogDebugError("could not get session cookie", err)
+				Log.DebugError("could not get session cookie", err)
 				next.ServeHTTP(w, r)
 				return
 			}
@@ -24,7 +24,7 @@ func mwAuthentication(next http.Handler) http.Handler {
 			var sessionJSON string
 			err = cookieHandler.Decode("session", cookie.Value, &sessionJSON)
 			if err != nil {
-				LogWarnError("could not decode session cookie", err)
+				Log.WarnError("could not decode session cookie", err)
 				next.ServeHTTP(w, r)
 				return
 			}
@@ -32,18 +32,18 @@ func mwAuthentication(next http.Handler) http.Handler {
 			var session sessionInfo
 			err = json.Unmarshal([]byte(sessionJSON), &session)
 			if err != nil {
-				LogWarnError("could not unmarshal session cookie", err)
+				Log.WarnError("could not unmarshal session cookie", err)
 				next.ServeHTTP(w, r)
 				return
 			}
 
-			LogDebugContext("initialized session context", LogContext{"userID": session.UserID})
+			Log.DebugContext("initialized session context", LogContext{"userID": session.UserID})
 
 			var user AppUser
 			if session.UserID > 0 {
 				err = DB.First(&user, session.UserID).Error
 				if err != nil {
-					LogErrorObj("could not get app user", err)
+					Log.ErrorObj("could not get app user", err)
 					RespondInternalServerError(w)
 					return
 				}

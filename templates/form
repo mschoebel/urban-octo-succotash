@@ -7,11 +7,18 @@
   </div>
 </article>
 {{end}}
+{{if ne csrf ""}}
+<div class="field is-hidden">
+  <input class="input" type="text" name="csrf" value="{{csrf}}">
+</div>
+{{end}}
 {{range .Items}}
   <div class="field {{if .IsHorizontal}}is-horizontal{{end}} {{if .IsHidden}}is-hidden{{end}}">
+    {{if not .IsHidden}}
     <div class="field-label is-normal">
       <label class="label">{{.Label}}</label>
     </div>
+    {{end}}
     <div class="field-body">
       <div class="field">
         <div class="control">

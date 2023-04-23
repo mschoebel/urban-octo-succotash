@@ -60,7 +60,7 @@
     <div class="level-item">
 {{if .HasActions}}
 {{range .Actions}}
-      <button class="button is-{{.ButtonClass}} is-small mr-2" hx-{{.Method}}="{{.TargetURL}}" {{if ne .Include ""}}hx-include="{{.Include}}"{{end}} {{if hasPrefix .TargetURL "/dialogs/"}}hx-target="body" hx-swap="beforeend"{{end}}>
+      <button class="button is-{{.ButtonClass}} is-small mr-2" hx-{{.Method}}="{{.TargetURL}}{{if ne .Method "get"}}&csrf={{csrf}}{{end}}" {{if ne .Include ""}}hx-include="{{.Include}}"{{end}} {{if hasPrefix .TargetURL "/dialogs/"}}hx-target="body" hx-swap="beforeend"{{end}}>
         {{if ne .Icon ""}}<span class="icon"><i class="las la-{{.Icon}}"></i></span>{{end}}
         {{if ne .Text ""}}<span>{{.Text}}</span>{{end}}
       </button>
@@ -69,7 +69,7 @@
     </div>
   </div>
   <div class="level-right">
-{{if ne .PageCount 1}}
+{{if ge .PageCount 2}}
     <div class="level-item">
       <button type="button" class="button is-small mr-2" {{if eq $.Config.Page 1}}disabled{{else}}hx-get="{{$.TableBaseURL}}&page={{dec $.Config.Page}}{{if $.Config.SortColumn}}&sort={{if eq $.Config.SortMode "DESC"}}-{{end}}{{$.Config.SortColumn}}{{end}}" hx-target="#{{$.TableID}}" hx-trigger="click" hx-swap="outerHTML"{{end}}>
         <i class="las la-angle-left" aria-hidden="true"></i>

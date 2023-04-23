@@ -3,7 +3,11 @@ package uos
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
+	"time"
+
+	"gorm.io/gorm"
 )
 
 const (
@@ -39,14 +43,28 @@ func mwAuthentication(next http.Handler) http.Handler {
 
 			Log.DebugContext("initialized session context", LogContext{"userID": session.UserID})
 
+			if time.Since(session.Expiration).Seconds() > 0 {
+				// session expired -> continue without authentifiaction
+				Log.DebugContext("session expired", LogContext{"expiration": session.Expiration})
+				next.ServeHTTP(w, r)
+				return
+			}
+
 			var user AppUser
 			if session.UserID > 0 {
 				err = DB.First(&user, session.UserID).Error
+				if errors.Is(err, gorm.ErrRecordNotFound) {
+					// invalid session (user not available) -> continue without authentification
+					next.ServeHTTP(w, r)
+					return
+				}
 				if err != nil {
 					Log.ErrorObj("could not get app user", err)
 					RespondInternalServerError(w)
 					return
 				}
+
+				user.csrfToken = session.CSRFToken
 			}
 
 			ctx := context.WithValue(r.Context(), ctxAppUser, user)

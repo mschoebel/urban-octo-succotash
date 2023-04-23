@@ -30,6 +30,13 @@ func getTemplateFuncMap(r *http.Request) template.FuncMap {
 		"inc": func(x int) int { return x + 1 },
 		"dec": func(x int) int { return x - 1 },
 
+		"csrf": func() string {
+			if user, ok := r.Context().Value(ctxAppUser).(AppUser); ok {
+				return user.csrfToken
+			}
+			return ""
+		},
+
 		"user": func(key string) interface{} {
 			user, ok := r.Context().Value(ctxAppUser).(AppUser)
 			if !ok {
@@ -61,7 +68,7 @@ func renderTemplate(
 	data interface{},
 	templateName string,
 ) error {
-	templateFile, err := os.ReadFile(filepath.Join(config.Assets.Templates, templateName))
+	templateFile, err := ReadFile(filepath.Join(config.Assets.Templates, templateName))
 	if err != nil {
 		return err
 	}
@@ -133,7 +140,7 @@ func loadTemplate(
 	}
 
 	// load template
-	templateFile, err := os.ReadFile(templatePath)
+	templateFile, err := ReadFile(templatePath)
 	if err != nil {
 		Log.ErrorContext(
 			"could not read template file",

@@ -21,9 +21,9 @@
     {{end}}
 </head>
 <body>
-    <section id="content" class="section">
+    <div id="content">
         {{.Content}}
-    </section>
+    </div>
 
     {{range .Page.ScriptsBody}}
     <script src="{{if not (hasPrefix . "http")}}{{$.Page.StaticBaseURL}}{{end}}{{.}}"></script>

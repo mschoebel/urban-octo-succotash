@@ -1,4 +1,5 @@
-<div id="modal" class="modal is-active" _="on closeModal remove me">
+<div id="modal" class="modal is-active" _="on closeModal transition opacity to 0 over 80 ms then remove me
+                                           on every htmx:beforeSend toggle @disabled on .form-button until htmx:afterOnLoad">
   <div class="modal-background"></div>
   <div class="modal-card">
     <header class="modal-card-head">
@@ -12,7 +13,7 @@
       <span class="is-pulled-left">
         {{range .FooterLeft}}
           {{if .IsButton}}
-          <button class="button is-{{.TextClass}} is-small" {{if .IsClosing}}_="on click trigger closeModal"{{end}} {{if .IsSaving}}hx-post="/forms/{{.Form}}?dialog=true" hx-include="#{{.Form}}" hx-target="#{{.Form}}"{{end}}>{{.Text}}</button>
+          <button class="button is-{{.TextClass}} is-small form-button" {{if .IsClosing}}_="on click trigger closeModal"{{end}} {{if .IsSaving}}hx-post="/forms/{{.Form}}?dialog=true" hx-include="#{{.Form}}" hx-target="#{{.Form}}"{{end}}>{{.Text}}</button>
           {{else}}
           <span class="has-text-{{.TextClass}}">{{.Text}}</span>
           {{end}}
@@ -23,7 +24,7 @@
       <span class="is-pulled-right">
         {{range .FooterRight}}
           {{if .IsButton}}
-          <button class="button is-{{.TextClass}} is-small" {{if .IsClosing}}_="on click trigger closeModal"{{end}} {{if .IsSaving}}hx-post="/forms/{{.Form}}?dialog=true" hx-include="#{{.Form}}" hx-target="#{{.Form}}"{{end}}>{{.Text}}</button>
+          <button class="button is-{{.TextClass}} is-small form-button" {{if .IsClosing}}_="on click trigger closeModal"{{end}} {{if .IsSaving}}hx-post="/forms/{{.Form}}?dialog=true" hx-include="#{{.Form}}" hx-target="#{{.Form}}"{{end}}>{{.Text}}</button>
           {{else}}
           {{end}}
         {{end}}

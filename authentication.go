@@ -25,12 +25,14 @@ func setupAuthentication() {
 type sessionInfo struct {
 	UserID     uint      `json:"id"`
 	Expiration time.Time `json:"expiration"`
+	CSRFToken  string    `json:"token"`
 }
 
 func setSession(userID uint, w http.ResponseWriter) {
 	session := sessionInfo{
 		UserID:     userID,
 		Expiration: time.Now().Add(30 * time.Minute),
+		CSRFToken:  randomString(32),
 	}
 
 	valueBytes, err := json.Marshal(session)

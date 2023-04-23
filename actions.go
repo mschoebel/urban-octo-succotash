@@ -57,6 +57,13 @@ func getActionHandlerFunc(actions []ActionSpec) AppRequestHandler {
 			return
 		}
 
+		// CSRF protection
+		if !IsCSRFtokenValid(r, r.Form.Get("csrf")) {
+			Log.Debug("CSRF token mismatch")
+			RespondBadRequest(w)
+			return
+		}
+
 		Log.InfoContext("execute action", LogContext{"name": actionName, "method": r.Method})
 		handleResponseAction(w, r, actionSpec.Do(w, r))
 	}

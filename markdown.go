@@ -3,7 +3,6 @@ package uos
 import (
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -68,7 +67,7 @@ func markdownHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// read markdown file
-	md, err := ioutil.ReadFile(mdFilePath)
+	md, err := ReadFile(mdFilePath)
 	if err != nil {
 		Log.ErrorContext(
 			"could not read markdown file",

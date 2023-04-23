@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math/rand"
 	"net/http"
+	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -40,6 +41,16 @@ func RespondNotImplemented(w http.ResponseWriter) {
 // RespondInternalServerError sends "internal server error".
 func RespondInternalServerError(w http.ResponseWriter) {
 	respondWithStatusText(w, http.StatusInternalServerError)
+}
+
+func IsCSRFtokenValid(r *http.Request, token string) bool {
+	if user, ok := r.Context().Value(ctxAppUser).(AppUser); ok {
+		// user is authenticated -> token can be "" (= no token required) or must match
+		return token == "" || token == user.csrfToken
+	}
+
+	// token must be "" (= no token required)
+	return token == ""
 }
 
 func stringToInt(s string, defaultValue int) int {
@@ -84,4 +95,24 @@ func base64decode(input string) []byte {
 		return nil
 	}
 	return result
+}
+
+// ReadFile reads the specified file (using 'os.ReadFile'). It checks, whether the given path
+// is contained in the configured base directory (e.g. the current working dir) - if not it
+// returnes an error. Use this function to guard against malicious paths.
+func ReadFile(path string) ([]byte, error) {
+	absPath, err := filepath.Abs(path)
+	if err != nil {
+		return nil, err
+	}
+
+	Log.TraceContext(
+		"base directory check",
+		LogContext{"base": config.BaseDir, "file": absPath},
+	)
+	if !strings.HasPrefix(absPath, config.BaseDir+string(filepath.Separator)) {
+		return nil, fmt.Errorf("path outside of base directory")
+	}
+
+	return os.ReadFile(path)
 }

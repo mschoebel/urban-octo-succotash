@@ -217,6 +217,7 @@ func getFormsHandlerFunc(forms []FormSpec) AppRequestHandler {
 		var (
 			id           = r.Form.Get("id")
 			submitButton = r.Form.Get("btn")
+			csrf         = r.Form.Get("csrf")
 		)
 
 		// process request
@@ -241,6 +242,13 @@ func getFormsHandlerFunc(forms []FormSpec) AppRequestHandler {
 			formSave, ok := formSpec.(FormSpecSave)
 			if !ok {
 				RespondNotImplemented(w)
+				return
+			}
+
+			// CSRF protection
+			if !IsCSRFtokenValid(r, csrf) {
+				Log.Debug("CSRF token mismatch")
+				RespondBadRequest(w)
 				return
 			}
 
@@ -277,6 +285,13 @@ func getFormsHandlerFunc(forms []FormSpec) AppRequestHandler {
 			formDelete, ok := formSpec.(FormSpecDelete)
 			if !ok {
 				RespondNotImplemented(w)
+				return
+			}
+
+			// CSRF protection
+			if !IsCSRFtokenValid(r, csrf) {
+				Log.Debug("CSRF token mismatch")
+				RespondBadRequest(w)
 				return
 			}
 

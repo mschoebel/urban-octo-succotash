@@ -90,7 +90,7 @@ func dbColumns(name string) []string {
 
 func dbEntryCount(name string) (int64, error) {
 	var count int64
-	return count, DB.Table(dbModelInfos[name].table).Count(&count).Error
+	return count, DB.Table(dbModelInfos[name].table).Where("deleted_at IS NULL").Count(&count).Error
 }
 
 // DBExtract returns a table of the specified columns extracted from the given list of models.

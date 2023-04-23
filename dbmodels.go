@@ -18,6 +18,8 @@ type AppUser struct {
 	Salt         string
 
 	IsAdmin bool
+
+	csrfToken string
 }
 
 func (AppUser) TableName() string {

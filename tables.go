@@ -144,6 +144,13 @@ func getTableHandlerFunc(tables []TableSpec) AppRequestHandler {
 				return
 			}
 
+			// CSRF protection
+			if !IsCSRFtokenValid(r, r.Form.Get("csrf")) {
+				Log.Debug("CSRF token mismatch")
+				RespondBadRequest(w)
+				return
+			}
+
 			// extract IDs from request
 			ids := []uint{}
 			for key := range r.Form {

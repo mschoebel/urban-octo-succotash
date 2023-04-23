@@ -3,7 +3,8 @@ package uos
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"os"
+	"path/filepath"
 )
 
 // AppConfiguration specifies application/framework configuration.
@@ -11,6 +12,9 @@ import (
 type AppConfiguration struct {
 	// web application port
 	Port int `json:"port"`
+	// base deployment directory - only files "below" this directory are used.
+	// If empty or not defined, the directory of the executable is set.
+	BaseDir string `json:"base_dir"`
 
 	Logging    LogConfiguration        `json:"logging"`
 	Monitoring MonitoringConfiguration `json:"monitoring"`
@@ -82,7 +86,7 @@ type PageConfiguration struct {
 var config = AppConfiguration{}
 
 func readConfiguration(configFilePath string) error {
-	configFileContent, err := ioutil.ReadFile(configFilePath)
+	configFileContent, err := os.ReadFile(configFilePath)
 	if err != nil {
 		return err
 	}
@@ -104,6 +108,18 @@ func readConfiguration(configFilePath string) error {
 
 	config.Auth.hash = []byte(config.Auth.HashKey)
 	config.Auth.block = []byte(config.Auth.BlockKey)
+
+	// determine base directory
+	if config.BaseDir == "" {
+		exePath, err := os.Executable()
+		if err != nil {
+			return err
+		}
+		config.BaseDir, err = filepath.Abs(exePath)
+		if err != nil {
+			return err
+		}
+	}
 
 	return nil
 }

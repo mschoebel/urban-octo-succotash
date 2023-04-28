@@ -23,7 +23,7 @@
       <div class="field">
         <div class="control">
           {{if eq .InputType "input"}}
-          <input {{if .ID}}id="{{.ID}}"{{end}} class="{{.InputType}} {{.Class}} {{.HelpClass}}" type="{{.InputTypeHTML}}" name="{{.Name}}" placeholder="{{.Placeholder}}" value="{{.Value}}" {{if .Min}}min="{{.Min}}"{{end}} {{if .Max}}max="{{.Max}}"{{end}} {{if .HasFocus}}autofocus{{end}}></input>
+          <input {{if .ID}}id="{{.ID}}"{{end}} class="{{.InputType}} {{.Class}} {{.HelpClass}}" type="{{.InputTypeHTML}}" name="{{.Name}}" placeholder="{{.Placeholder}}" value="{{.Value}}" {{if .Min}}min="{{.Min}}"{{end}} {{if .Max}}max="{{.Max}}"{{end}} {{if .HasFocus}}autofocus{{end}} _="on keyup if the event's key is 'Enter' send click to #save-btn{{if $.Button}}-{{$.ID}}{{end}}"></input>
           {{else if eq .InputType "textarea"}}
           <textarea {{if .ID}}id="{{.ID}}"{{end}} class="{{.InputType}} {{.Class}} {{.HelpClass}}" name="{{.Name}}" placeholder="{{.Placeholder}}">{{.Value}}</textarea>
           {{end}}
@@ -43,7 +43,7 @@
 </form>
 {{if .Button}}
   <div class="is-pulled-right mt-2">
-    <button class="button is-black is-small" hx-post="/forms/{{.ID}}?btn={{.Button}}" hx-include="#{{.ID}}" hx-target="#form-{{.ID}}">{{.Button}}</button>
+    <button class="button is-black is-small" id="save-btn-{{.ID}}" hx-post="/forms/{{.ID}}?btn={{.Button}}" hx-include="#{{.ID}}" hx-target="#form-{{.ID}}">{{.Button}}</button>
   </div>
 {{end}}
 </div>

@@ -275,6 +275,8 @@ func getFormsHandlerFunc(forms []FormSpec) AppRequestHandler {
 				}
 
 				action.doCloseDialog = r.Form.Get("dialog") == "true"
+				action.redirect = r.Form.Get("ref")
+
 				handleResponseAction(w, r, action)
 				return
 			}

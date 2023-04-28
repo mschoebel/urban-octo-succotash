@@ -10,6 +10,9 @@ import (
 // AppConfiguration specifies application/framework configuration.
 // Is read from a JSON configuration file in ComponentSetup.
 type AppConfiguration struct {
+	// application context information, available as template context
+	AppInfo map[string]interface{} `json:"app"`
+
 	// web application port
 	Port int `json:"port"`
 	// base deployment directory - only files "below" this directory are used.

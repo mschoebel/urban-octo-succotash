@@ -37,10 +37,16 @@ func getTemplateFuncMap(r *http.Request) template.FuncMap {
 			return ""
 		},
 
+		"app": func(key string) interface{} {
+			if info, ok := config.AppInfo[key]; ok {
+				return info
+			}
+			return ""
+		},
 		"user": func(key string) interface{} {
 			user, ok := r.Context().Value(ctxAppUser).(AppUser)
 			if !ok {
-				return false
+				return ""
 			}
 
 			switch key {
@@ -52,7 +58,7 @@ func getTemplateFuncMap(r *http.Request) template.FuncMap {
 				return user.Name
 			}
 
-			return false
+			return ""
 		},
 	}
 }

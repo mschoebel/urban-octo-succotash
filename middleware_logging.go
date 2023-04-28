@@ -28,7 +28,8 @@ func mwLogging(next http.Handler) http.Handler {
 				lrw       = newLoggingResponseWriter(w)
 			)
 
-			Log.InfoContext(
+			Log.InfoContextR(
+				r,
 				"received request",
 				LogContext{
 					"time":   startTime,
@@ -47,7 +48,8 @@ func mwLogging(next http.Handler) http.Handler {
 			Metrics.CounterIncCondition(mRequestFailed, lrw.statusCode >= 500)
 			Metrics.CounterIncCondition(mRequestSlow, duration >= 2*time.Second)
 
-			Log.InfoContext(
+			Log.InfoContextR(
+				r,
 				"done request",
 				LogContext{
 					"duration": duration,

@@ -4,10 +4,10 @@ import (
 	"net/http"
 )
 
-func mwWrap(h http.Handler) http.Handler {
-	return mwAuthentication(mwLogging(h))
+func mwWrap(h http.Handler, options AppRequestHandlerOptions) http.Handler {
+	return mwContext(mwLogging(mwAuthentication(h, options.IsAuthRequired)))
 }
 
-func mwWrapF(f func(http.ResponseWriter, *http.Request)) http.Handler {
-	return mwWrap(http.HandlerFunc(f))
+func mwWrapF(f func(http.ResponseWriter, *http.Request), options AppRequestHandlerOptions) http.Handler {
+	return mwWrap(http.HandlerFunc(f), options)
 }

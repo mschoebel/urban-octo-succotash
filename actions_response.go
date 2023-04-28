@@ -16,6 +16,8 @@ type ResponseAction struct {
 	messageClass string
 
 	callback func(http.ResponseWriter)
+
+	redirect string
 }
 
 // ResponseRefresh triggers a full frontend page refresh.
@@ -45,7 +47,7 @@ func ResponseFormError(message string) *ResponseAction {
 }
 
 // ResponseSetSessionCookie sets a session cookie for the specified user and
-// triggers a full frontend page refresh.
+// triggers a full frontend page refresh or a redirect to the given URL.
 func ResponseSetSessionCookie(userID uint) *ResponseAction {
 	return &ResponseAction{
 		doPageRefresh: true,
@@ -76,7 +78,11 @@ func handleResponseAction(w http.ResponseWriter, r *http.Request, action *Respon
 	}
 
 	if action.doPageRefresh {
-		w.Header().Add("HX-Refresh", "true")
+		if action.redirect != "" {
+			w.Header().Add("HX-Redirect", action.redirect)
+		} else {
+			w.Header().Add("HX-Refresh", "true")
+		}
 		return
 	}
 

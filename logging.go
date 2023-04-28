@@ -3,6 +3,7 @@ package uos
 import (
 	"fmt"
 	"net"
+	"net/http"
 	"os"
 	"time"
 
@@ -49,6 +50,14 @@ type LogContext map[string]interface{}
 
 func errorLogContext(err error) LogContext {
 	return LogContext{"error": err}
+}
+
+func (lc LogContext) request(r *http.Request) LogContext {
+	if lc == nil {
+		lc = LogContext{}
+	}
+	lc["request"] = r.Context().Value(ctxRequestID)
+	return lc
 }
 
 func appendLogContext(l *zerolog.Event, message string, context LogContext) {
@@ -213,4 +222,115 @@ func (l *internalLogger) InfoError(message string, err error) {
 // Debug logs the specified message and error at log level 'debug'.
 func (l *internalLogger) DebugError(message string, err error) {
 	l.DebugContext(message, errorLogContext(err))
+}
+
+// PanicContext logs the specified message and context at log level 'panic'.
+func (internalLogger) PanicContextR(r *http.Request, message string, context LogContext) {
+	Metrics.CounterInc(mLogMessage)
+	Metrics.CounterInc(mLogMessagePanic)
+	appendLogContext(log.Panic(), message, context.request(r))
+}
+
+// FatalContext logs the specified message and context at log level 'fatal'.
+func (internalLogger) FatalContextR(r *http.Request, message string, context LogContext) {
+	Metrics.CounterInc(mLogMessage)
+	Metrics.CounterInc(mLogMessagePanic)
+	appendLogContext(log.Fatal(), message, context.request(r))
+}
+
+// ErrorContext logs the specified message and context at log level 'error'.
+func (internalLogger) ErrorContextR(r *http.Request, message string, context LogContext) {
+	Metrics.CounterInc(mLogMessage)
+	Metrics.CounterInc(mLogMessageError)
+	appendLogContext(log.Error(), message, context.request(r))
+}
+
+// WarnContext logs the specified message and context at log level 'warning'.
+func (internalLogger) WarnContextR(r *http.Request, message string, context LogContext) {
+	Metrics.CounterInc(mLogMessage)
+	Metrics.CounterInc(mLogMessageWarning)
+	appendLogContext(log.Warn(), message, context.request(r))
+}
+
+// InfoContext logs the specified message and context at log level 'info'.
+func (internalLogger) InfoContextR(r *http.Request, message string, context LogContext) {
+	Metrics.CounterInc(mLogMessage)
+	appendLogContext(log.Info(), message, context.request(r))
+}
+
+// DebugContext logs the specified message and context at log level 'debug'.
+func (internalLogger) DebugContextR(r *http.Request, message string, context LogContext) {
+	appendLogContext(log.Debug(), message, context.request(r))
+}
+
+// TraceContext logs the specified message and context at log level 'trace'.
+func (internalLogger) TraceContextR(r *http.Request, message string, context LogContext) {
+	appendLogContext(log.Trace(), message, context.request(r))
+}
+
+// PanicR logs the specified message at log level 'panic'. Includes request ID as context.
+func (l *internalLogger) PanicR(r *http.Request, message string) {
+	l.PanicContextR(r, message, nil)
+}
+
+// FatalR logs the specified message at log level 'fatal'. Includes request ID as context.
+func (l *internalLogger) FatalR(r *http.Request, message string) {
+	l.FatalContextR(r, message, nil)
+}
+
+// ErrorR logs the specified message at log level 'error'. Includes request ID as context.
+func (l *internalLogger) ErrorR(r *http.Request, message string) {
+	l.ErrorContextR(r, message, nil)
+}
+
+// WarnR logs the specified message at log level 'warning'. Includes request ID as context.
+func (l *internalLogger) WarnR(r *http.Request, message string) {
+	l.WarnContextR(r, message, nil)
+}
+
+// InfoR logs the specified message at log level 'info'. Includes request ID as context.
+func (l *internalLogger) InfoR(r *http.Request, message string) {
+	l.InfoContextR(r, message, nil)
+}
+
+// DebugR logs the specified message at log level 'debug'. Includes request ID as context.
+func (l *internalLogger) DebugR(r *http.Request, message string) {
+	l.DebugContextR(r, message, nil)
+}
+
+// TraceR logs the specified message at log level 'trace'. Includes request ID as context.
+func (l *internalLogger) TraceR(r *http.Request, message string) {
+	l.TraceContextR(r, message, nil)
+}
+
+// PanicErrorR logs the specified message and error at log level 'panic'. Panics.
+// Includes request ID as context.
+func (l *internalLogger) PanicErrorR(r *http.Request, message string, err error) {
+	l.PanicContextR(r, message, errorLogContext(err))
+	panic(message)
+}
+
+// FatalErrorR logs the specified message and error at log level 'fatal'. Includes request ID as context.
+func (l *internalLogger) FatalErrorR(r *http.Request, message string, err error) {
+	l.FatalContextR(r, message, errorLogContext(err))
+}
+
+// ErrorObjR logs the specified message and error at log level 'error'. Includes request ID as context.
+func (l *internalLogger) ErrorObjR(r *http.Request, message string, err error) {
+	l.ErrorContextR(r, message, errorLogContext(err))
+}
+
+// WarnR logs the specified message at and error log level 'warning'. Includes request ID as context.
+func (l *internalLogger) WarnErrorR(r *http.Request, message string, err error) {
+	l.WarnContextR(r, message, errorLogContext(err))
+}
+
+// InfoR logs the specified message at and error log level 'info'. Includes request ID as context.
+func (l *internalLogger) InfoErrorR(r *http.Request, message string, err error) {
+	l.InfoContextR(r, message, errorLogContext(err))
+}
+
+// DebugR logs the specified message and error at log level 'debug'. Includes request ID as context.
+func (l *internalLogger) DebugErrorR(r *http.Request, message string, err error) {
+	l.DebugContextR(r, message, errorLogContext(err))
 }

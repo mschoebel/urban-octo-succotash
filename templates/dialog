@@ -24,7 +24,7 @@
       <span class="is-pulled-right">
         {{range .FooterRight}}
           {{if .IsButton}}
-          <button class="button is-{{.TextClass}} is-small form-button" {{if .IsClosing}}_="on click trigger closeModal"{{end}} {{if .IsSaving}}hx-post="/forms/{{.Form}}?dialog=true" hx-include="#{{.Form}}" hx-target="#{{.Form}}"{{end}}>{{.Text}}</button>
+          <button class="button is-{{.TextClass}} is-small form-button" {{if .IsClosing}}_="on click trigger closeModal"{{end}} {{if .IsSaving}}id="save-btn" hx-post="/forms/{{.Form}}?dialog=true" hx-include="#{{.Form}}" hx-target="#{{.Form}}"{{end}}>{{.Text}}</button>
           {{else}}
           {{end}}
         {{end}}

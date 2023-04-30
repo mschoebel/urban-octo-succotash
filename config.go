@@ -29,6 +29,8 @@ type AppConfiguration struct {
 	// page configuration integrated into HTML pages. To define common settings
 	// the page "_default" can be specified.
 	Pages map[string]PageConfiguration `json:"pages"`
+
+	Tuning TuningConfiguration `json:"tuning"`
 }
 
 // LogConfiguration specifies logging behaviour.
@@ -84,6 +86,10 @@ type PageConfiguration struct {
 
 	ScriptsHead []string `json:"scripts_head"`
 	ScriptsBody []string `json:"scripts_body"`
+}
+
+type TuningConfiguration struct {
+	ActivateHTMXPreloading bool `json:"htmx_preload"`
 }
 
 var config = AppConfiguration{}

@@ -192,8 +192,8 @@ func getFormsHandlerFunc(forms []FormSpec) AppRequestHandler {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// determine form
 		formName := getElementName("forms", r.URL.Path)
-		Log.DebugContext(
-			"handle form",
+		Log.DebugContextR(
+			r, "handle form",
 			LogContext{
 				"name":   formName,
 				"method": r.Method,
@@ -207,13 +207,6 @@ func getFormsHandlerFunc(forms []FormSpec) AppRequestHandler {
 		}
 
 		// prepare request processing (URL form data might be empty)
-		err := r.ParseForm()
-		if err != nil {
-			Log.WarnError("could not parse form", err)
-			RespondBadRequest(w)
-			return
-		}
-
 		var (
 			id           = r.Form.Get("id")
 			submitButton = r.Form.Get("btn")
@@ -232,7 +225,7 @@ func getFormsHandlerFunc(forms []FormSpec) AppRequestHandler {
 
 			items, err := formRead.Read(id)
 			if err != nil {
-				handleFormError(w, "could not read/initialize form", err)
+				handleFormError(w, r, "could not read/initialize form", err)
 				return
 			}
 
@@ -247,7 +240,7 @@ func getFormsHandlerFunc(forms []FormSpec) AppRequestHandler {
 
 			// CSRF protection
 			if !IsCSRFtokenValid(r, csrf) {
-				Log.Debug("CSRF token mismatch")
+				Log.DebugR(r, "CSRF token mismatch")
 				RespondBadRequest(w)
 				return
 			}
@@ -255,7 +248,7 @@ func getFormsHandlerFunc(forms []FormSpec) AppRequestHandler {
 			// initialize (empty) form
 			items, err := formSave.Read("")
 			if err != nil {
-				handleFormError(w, "could not initialize form", err)
+				handleFormError(w, r, "could not initialize form", err)
 				return
 			}
 
@@ -264,7 +257,7 @@ func getFormsHandlerFunc(forms []FormSpec) AppRequestHandler {
 			if isValid {
 				action, err := formSave.Save(id, items)
 				if err != nil {
-					Log.ErrorObj("could not save form item", err)
+					Log.ErrorObjR(r, "could not save form item", err)
 					RespondInternalServerError(w)
 					return
 				}
@@ -292,14 +285,14 @@ func getFormsHandlerFunc(forms []FormSpec) AppRequestHandler {
 
 			// CSRF protection
 			if !IsCSRFtokenValid(r, csrf) {
-				Log.Debug("CSRF token mismatch")
+				Log.DebugR(r, "CSRF token mismatch")
 				RespondBadRequest(w)
 				return
 			}
 
 			action, err := formDelete.Delete(id)
 			if err != nil {
-				handleFormError(w, "could not delete form item", err)
+				handleFormError(w, r, "could not delete form item", err)
 				return
 			}
 
@@ -311,7 +304,7 @@ func getFormsHandlerFunc(forms []FormSpec) AppRequestHandler {
 	}
 }
 
-func handleFormError(w http.ResponseWriter, message string, err error) {
+func handleFormError(w http.ResponseWriter, r *http.Request, message string, err error) {
 	switch err {
 	case ErrorFormItemNotFound:
 		RespondNotFound(w)
@@ -322,7 +315,7 @@ func handleFormError(w http.ResponseWriter, message string, err error) {
 	}
 
 	// all other cases: log error and respond
-	Log.ErrorObj(message, err)
+	Log.ErrorObjR(r, message, err)
 	RespondInternalServerError(w)
 }
 
@@ -337,8 +330,8 @@ func renderForm(w http.ResponseWriter, r *http.Request, name string, form FormIt
 
 	err := renderInternalTemplate(w, r, "form", context)
 	if err != nil {
-		Log.ErrorContext(
-			"could not render form",
+		Log.ErrorContextR(
+			r, "could not render form",
 			LogContext{"name": name, "error": err},
 		)
 		RespondInternalServerError(w)

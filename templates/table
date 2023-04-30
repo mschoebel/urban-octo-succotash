@@ -12,6 +12,9 @@
         </label>
       </th>
 {{end}}
+{{if .Display.IsExpandable}}
+      <th></th>
+{{end}}
 {{range .Columns}}
       <th class="{{if .IsSortField}}is-current-sort{{end}} {{if .IsSortable}}is-sortable{{end}}" {{if .IsSortable}}hx-get="{{$.TableBaseURL}}&page=1&sort={{if .IsSortField}}{{if not .IsSortDesc}}-{{end}}{{end}}{{.Name}}" hx-target="#{{$.TableID}}" hx-trigger="click" hx-swap="outerHTML"{{end}}>
         {{.DisplayName}} {{if .IsSortField}}<i class="las la-sort-{{if .IsSortDesc}}down{{else}}up{{end}}" aria-hidden="true"></i>{{end}}
@@ -32,12 +35,23 @@
     </tr>
 {{else}}
 {{range .Data}}
-    <tr>
+    <tr id="table-{{$.TableID}}-row-{{index . 0}}">
 {{if $.Display.IsSelectable}}
       <td class="is-checkbox-cell">
         <label class="checkbox">
           <input type="checkbox" class="selection select-{{$.TableID}}" name="item-{{index . 0}}" _="on change if not me.checked then set #select-all-{{$.TableID}}.checked to false" />
         </label>
+      </td>
+{{end}}
+{{if $.Display.IsExpandable}}
+      <td class="is-chevron-cell">
+        <a role="button">
+          <i class="las la-angle-double-right" aria-hidden="true" _="on click send expand to #table-{{$.TableID}}-detail-row-{{index . 0}} then
+                                                                              if I match .la-angle-double-right send loadDetails to #table-{{$.TableID}}-detail-{{index . 0}} end then
+                                                                              toggle .la-angle-double-right on me then
+                                                                              toggle .la-angle-double-down on me"
+          ></i>
+        </a>
       </td>
 {{end}}
 {{range $idx, $entry := .}}
@@ -48,6 +62,15 @@
       {{end}}
 {{end}}
     </tr>
+{{if $.Display.IsExpandable}}
+    <tr id="table-{{$.TableID}}-detail-row-{{index . 0}}" class="detail is-hidden" _="on expand toggle .is-hidden on me">
+      <td colspan="{{$.ColumnWidth}}">
+        <div class="detail-container">
+          <div id="table-{{$.TableID}}-detail-{{index . 0}}" hx-get="/person/{{index . 0}}" hx-trigger="loadDetails" hx-swap="innerHTML"></div>
+        </div>
+      </td>
+    </tr>
+{{end}}
 {{end}}
 {{end}}
   </tbody>

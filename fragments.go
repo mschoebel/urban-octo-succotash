@@ -1,8 +1,8 @@
 package uos
 
 import (
+	"io"
 	"net/http"
-	"net/url"
 )
 
 // FragmentSpec describes an interface a web application fragment must provide.
@@ -12,10 +12,10 @@ type FragmentSpec interface {
 	Name() string
 }
 
-// FragmentSpecRead describes an interface an fragment that supports GET requests must provide.
+// FragmentSpecRead describes an interface a fragment that supports GET requests must provide.
 type FragmentSpecRead interface {
 	// GetContextObject returns the fragment template context object for the given URL parameters.
-	GetContextObject(params url.Values) (interface{}, error)
+	GetContextObject(params Getter) (interface{}, error)
 }
 
 // FragmentHandler returns a handler for the "/fragments/" route providing the specified fragments.
@@ -24,69 +24,78 @@ type FragmentSpecRead interface {
 func FragmentHandler(fragments ...FragmentSpec) AppRequestHandlerMapping {
 	return AppRequestHandlerMapping{
 		Route:   "/fragments/",
-		Handler: getFragmentHandlerFunc(fragments),
+		Handler: getFragmentWebHandlerFunc(fragments),
 	}
 }
 
-func getFragmentHandlerFunc(fragments []FragmentSpec) AppRequestHandler {
-	nameToSpec := map[string]FragmentSpec{}
+var fragmentRegistry map[string]FragmentSpec
+
+func getFragmentWebHandlerFunc(fragments []FragmentSpec) AppRequestHandler {
+	if fragmentRegistry != nil {
+		Log.Panic("multiple fragment handler registration")
+	}
+
+	fragmentRegistry = map[string]FragmentSpec{}
 	for _, f := range fragments {
-		nameToSpec[f.Name()] = f
+		fragmentRegistry[f.Name()] = f
 		Log.DebugContext("register fragment spec", LogContext{"name": f.Name()})
 	}
 
 	return func(w http.ResponseWriter, r *http.Request) {
 		// determine fragment
-		fragmentName := getElementName("fragments", r.URL.Path)
-		Log.DebugContext(
-			"handle fragment",
+		name := getElementName("fragments", r.URL.Path)
+		Log.DebugContextR(
+			r, "handle fragment",
 			LogContext{
-				"name":   fragmentName,
+				"name":   name,
 				"method": r.Method,
 			},
 		)
 
-		// prepare request processing
-		err := r.ParseForm()
-		if err != nil {
-			Log.WarnError("could not parse form", err)
-			RespondBadRequest(w)
-			return
-		}
-
-		fragmentSpec, ok := nameToSpec[fragmentName]
-		if !ok {
-			// might be fragment without specification -> directly forward to rendering
-			Log.DebugContext("handle fragment without spec", LogContext{"name": fragmentName})
-			renderObjectFragment(w, r, fragmentName, r.Form.Get("p"))
+		// only GET requests are supported
+		if r.Method != http.MethodGet {
+			RespondNotImplemented(w)
 			return
 		}
 
 		// process request
-		switch r.Method {
-		case http.MethodGet:
-			// does the fragment support GET method?
-			fragmentRead, ok := fragmentSpec.(FragmentSpecRead)
-			if !ok {
-				RespondNotImplemented(w)
-				return
-			}
+		status, err := handleFragment(w, r, name, r.Form)
+		if err != nil {
+			handleFragmentError(w, r, "could not handle fragment", err)
+			return
+		}
 
-			// process fragment
-			obj, err := fragmentRead.GetContextObject(r.Form)
-			if err != nil {
-				handleFragmentError(w, "could not get fragment context", err)
-				return
-			}
-
-			renderObjectFragment(w, r, fragmentName, obj)
-		default:
-			RespondNotImplemented(w)
+		if status != http.StatusOK {
+			respondWithStatusText(w, status)
 		}
 	}
 }
 
-func handleFragmentError(w http.ResponseWriter, message string, err error) {
+func handleFragment(w io.Writer, r *http.Request, name string, form Getter) (int, error) {
+	// get fragment specification
+	fragmentSpec, ok := fragmentRegistry[name]
+	if !ok {
+		// might be fragment without specification -> directly forward to rendering
+		Log.DebugContextR(r, "handle fragment without spec", LogContext{"name": name})
+		return renderObjectFragment(w, r, name, form.Get("p"))
+	}
+
+	// does the fragment support GET method?
+	fragmentRead, ok := fragmentSpec.(FragmentSpecRead)
+	if !ok {
+		return http.StatusNotImplemented, nil
+	}
+
+	// process fragment
+	obj, err := fragmentRead.GetContextObject(form)
+	if err != nil {
+		return -1, err
+	}
+
+	return renderObjectFragment(w, r, name, obj)
+}
+
+func handleFragmentError(w http.ResponseWriter, r *http.Request, message string, err error) {
 	switch err {
 	case ErrorFragmentNotFound:
 		RespondNotFound(w)
@@ -97,40 +106,41 @@ func handleFragmentError(w http.ResponseWriter, message string, err error) {
 	}
 
 	// all other cases: log as internal error
-	Log.ErrorObj(message, err)
+	Log.ErrorObjR(r, message, err)
 	RespondInternalServerError(w)
 }
 
-func renderObjectFragment(w http.ResponseWriter, r *http.Request, name string, obj interface{}) {
+func renderObjectFragment(w io.Writer, r *http.Request, name string, obj interface{}) (int, error) {
 	data := map[string]interface{}{}
 
 	if obj != nil {
 		data["Object"] = obj
 	}
 
-	renderFragment(w, r, name, data)
+	return renderFragment(w, r, name, data)
 }
 
-func renderFragment(w http.ResponseWriter, r *http.Request, name string, data map[string]interface{}) {
+func renderFragment(w io.Writer, r *http.Request, name string, data map[string]interface{}) (int, error) {
 	fragmentTemplateName := "fragment_" + name
 
 	// initialize template
-	tmpl := loadTemplate(w, r, name, fragmentTemplateName)
+	tmpl, status := loadTemplate(w, r, name, fragmentTemplateName)
 	if tmpl == nil {
-		return
+		return status, nil
 	}
 
 	// render fragment
 	err := tmpl.ExecuteTemplate(w, name, data)
 	if err != nil {
-		Log.ErrorContext(
-			"could not execute fragment template",
+		Log.ErrorContextR(
+			r, "could not execute fragment template",
 			LogContext{
 				"fragment": name,
 				"error":    err,
 			},
 		)
-		RespondInternalServerError(w)
-		return
+		return http.StatusInternalServerError, nil
 	}
+
+	return http.StatusOK, nil
 }

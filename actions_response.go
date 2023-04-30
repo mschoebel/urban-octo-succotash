@@ -105,8 +105,8 @@ func handleResponseAction(w http.ResponseWriter, r *http.Request, action *Respon
 
 	err := renderInternalTemplate(w, r, template, context)
 	if err != nil {
-		Log.ErrorContext(
-			"could not render form response action",
+		Log.ErrorContextR(
+			r, "could not render form response action",
 			LogContext{"name": template, "error": err},
 		)
 		RespondInternalServerError(w)

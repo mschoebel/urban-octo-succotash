@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-// PageHandler returns a starndard GET handler for a template based page.
+// PageHandler returns a standard GET handler for a template based page.
 //
 // Called with a single parameter: specifiy the page template name, will be provided at "/<name>".
 //
@@ -38,13 +38,6 @@ func PageHandler(page ...string) AppRequestHandlerMapping {
 				return
 			}
 
-			err := r.ParseForm()
-			if err != nil {
-				Log.WarnError("could not parse form", err)
-				RespondBadRequest(w)
-				return
-			}
-
 			renderPage(
 				w, r, name,
 				map[string]interface{}{
@@ -64,8 +57,8 @@ func renderPage(w http.ResponseWriter, r *http.Request, name string, data map[st
 	var content bytes.Buffer
 	err := renderTemplate(&content, r, name, data, pageTemplateName)
 	if err != nil {
-		Log.ErrorContext(
-			"could not render page content template",
+		Log.ErrorContextR(
+			r, "could not render page content template",
 			LogContext{"name": name, "error": err},
 		)
 		RespondInternalServerError(w)
@@ -81,8 +74,8 @@ func renderPage(w http.ResponseWriter, r *http.Request, name string, data map[st
 
 	err = renderInternalTemplate(w, r, "page", data)
 	if err != nil {
-		Log.ErrorContext(
-			"could not render page",
+		Log.ErrorContextR(
+			r, "could not render page",
 			LogContext{"name": name, "error": err},
 		)
 		RespondInternalServerError(w)

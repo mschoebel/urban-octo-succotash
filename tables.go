@@ -110,8 +110,8 @@ func getTableHandlerFunc(tables []TableSpec) AppRequestHandler {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// determine table
 		tableName := getElementName("tables", r.URL.Path)
-		Log.DebugContext(
-			"handle table",
+		Log.DebugContextR(
+			r, "handle table",
 			LogContext{
 				"name":   tableName,
 				"method": r.Method,
@@ -121,14 +121,6 @@ func getTableHandlerFunc(tables []TableSpec) AppRequestHandler {
 		tableSpec, ok := nameToSpec[tableName]
 		if !ok {
 			RespondNotFound(w)
-			return
-		}
-
-		// prepare request processing (URL form data might be empty)
-		err := r.ParseForm()
-		if err != nil {
-			Log.WarnError("could not parse form", err)
-			RespondBadRequest(w)
 			return
 		}
 
@@ -146,7 +138,7 @@ func getTableHandlerFunc(tables []TableSpec) AppRequestHandler {
 
 			// CSRF protection
 			if !IsCSRFtokenValid(r, r.Form.Get("csrf")) {
-				Log.Debug("CSRF token mismatch")
+				Log.DebugR(r, "CSRF token mismatch")
 				RespondBadRequest(w)
 				return
 			}
@@ -164,7 +156,7 @@ func getTableHandlerFunc(tables []TableSpec) AppRequestHandler {
 			// forward to table handler
 			action, err := tableDelete.Delete(ids)
 			if err != nil {
-				handleFormError(w, "could not delete table items", err)
+				handleFormError(w, r, "could not delete table items", err)
 				return
 			}
 
@@ -315,6 +307,8 @@ type TableDisplayProperties struct {
 	IsMobileReady bool
 	// rows can be selected
 	IsSelectable bool
+	// rows can be expanded
+	IsExpandable bool
 }
 
 type tableRenderContext struct {
@@ -410,6 +404,9 @@ func newTableRenderContext(t TableSpec, form url.Values) (tableRenderContext, er
 	if context.Display.IsSelectable {
 		context.ColumnWidth += 1
 	}
+	if context.Display.IsExpandable {
+		context.ColumnWidth += 1
+	}
 	// .. integrate sorting info in columns info
 	for i, c := range context.Config.Columns {
 		if c == context.Config.SortColumn {
@@ -435,14 +432,14 @@ func newTableRenderContext(t TableSpec, form url.Values) (tableRenderContext, er
 func renderTable(w http.ResponseWriter, r *http.Request, t TableSpec, form url.Values) {
 	context, err := newTableRenderContext(t, form)
 	if err != nil {
-		handleTableError(w, "could not create table render context", err)
+		handleTableError(w, r, "could not create table render context", err)
 		return
 	}
 
 	err = renderInternalTemplate(w, r, "table", context)
 	if err != nil {
-		Log.ErrorContext(
-			"could not render table",
+		Log.ErrorContextR(
+			r, "could not render table",
 			LogContext{"name": t.Name(), "error": err},
 		)
 		RespondInternalServerError(w)
@@ -450,7 +447,7 @@ func renderTable(w http.ResponseWriter, r *http.Request, t TableSpec, form url.V
 	}
 }
 
-func handleTableError(w http.ResponseWriter, message string, err error) {
+func handleTableError(w http.ResponseWriter, r *http.Request, message string, err error) {
 	switch err {
 	case ErrorTableInvalidRequest:
 		RespondBadRequest(w)
@@ -458,6 +455,6 @@ func handleTableError(w http.ResponseWriter, message string, err error) {
 	}
 
 	// all other cases: log error and respond
-	Log.ErrorObj(message, err)
+	Log.ErrorObjR(r, message, err)
 	RespondInternalServerError(w)
 }

@@ -1,6 +1,7 @@
 package uos
 
 import (
+	"bytes"
 	"fmt"
 	"html/template"
 	"io"
@@ -9,6 +10,50 @@ import (
 	"path/filepath"
 	"strings"
 )
+
+func hxResolve(r *http.Request, element, method, url, trigger, swap, attributes string) template.HTML {
+	if config.Tuning.ActivateHTMXPreloading && method == "get" && trigger == "load" {
+		var (
+			itemType = getElementBase(url)
+			itemName = getElementName(itemType, url)
+
+			urlData = newFormData(url)
+
+			content bytes.Buffer
+		)
+
+		switch itemType {
+		case "fragments":
+			status, err := handleFragment(&content, r, itemName, urlData)
+			if status == http.StatusOK && err == nil {
+				Log.TraceContext(
+					"HTMX preloading successful",
+					LogContext{"type": itemType, "name": itemName},
+				)
+				return template.HTML(content.String())
+			}
+		case "markdown":
+			status := markdownHandler(&content, r, itemName)
+			if status == http.StatusOK {
+				Log.TraceContext(
+					"HTMX preloading successful",
+					LogContext{"type": itemType, "name": itemName},
+				)
+				return template.HTML(content.String())
+			}
+		default:
+			Log.TraceContext("HTMX preloading not supported", LogContext{"type": itemType})
+		}
+	}
+
+	// return directly as HTMX element -> no pre-loading
+	return template.HTML(
+		fmt.Sprintf(
+			`<%[1]s hx-%[2]s="%[3]s" hx-trigger="%[4]s" hx-swap="%[5]s" %[6]s></%[1]s>`,
+			element, method, url, trigger, swap, attributes,
+		),
+	)
+}
 
 func getTemplateFuncMap(r *http.Request) template.FuncMap {
 	return template.FuncMap{
@@ -29,6 +74,13 @@ func getTemplateFuncMap(r *http.Request) template.FuncMap {
 
 		"inc": func(x int) int { return x + 1 },
 		"dec": func(x int) int { return x - 1 },
+
+		"hx": func(element, method, url, trigger, swap, attributes string) template.HTML {
+			return hxResolve(r, element, method, url, trigger, swap, attributes)
+		},
+		"hxLoad": func(url string) template.HTML {
+			return hxResolve(r, "div", "get", url, "load", "outerHTML", "")
+		},
 
 		"csrf": func() string {
 			if user, ok := r.Context().Value(ctxAppUser).(AppUser); ok {
@@ -109,70 +161,65 @@ func renderInternalTemplate(
 }
 
 func loadTemplate(
-	w http.ResponseWriter,
+	w io.Writer,
 	r *http.Request,
 	name,
 	templateName string,
-) *template.Template {
+) (*template.Template, int) {
 	templatePath := filepath.Join(config.Assets.Templates, templateName)
 
 	// template not found?
 	info, err := os.Stat(templatePath)
 	if err != nil {
 		if os.IsNotExist(err) {
-			Log.WarnContext(
-				"file not found",
+			Log.WarnContextR(
+				r, "file not found",
 				LogContext{"file": templatePath},
 			)
-			RespondNotFound(w)
-			return nil
+			return nil, http.StatusNotFound
 		}
 
-		Log.ErrorContext(
-			"could not os.Stat template file",
+		Log.ErrorContextR(
+			r, "could not os.Stat template file",
 			LogContext{
 				"file":  templatePath,
 				"error": err,
 			},
 		)
-		RespondInternalServerError(w)
-		return nil
+		return nil, http.StatusInternalServerError
 	}
 
 	// requestes a directory? (trailing slash)
 	if info.IsDir() {
-		RespondNotFound(w)
-		return nil
+		return nil, http.StatusNotFound
 	}
 
 	// load template
 	templateFile, err := ReadFile(templatePath)
 	if err != nil {
-		Log.ErrorContext(
-			"could not read template file",
+		Log.ErrorContextR(
+			r, "could not read template file",
 			LogContext{
 				"file":  templatePath,
 				"error": err,
 			},
 		)
-		RespondInternalServerError(w)
-		return nil
+		return nil, http.StatusInternalServerError
 	}
 	templateString := preprocessTemplate(name, templateFile)
 
 	// parse template
 	tmpl, err := template.New("").Funcs(getTemplateFuncMap(r)).Parse(templateString)
 	if err != nil {
-		Log.ErrorContext(
-			"could not parse template file",
+		Log.ErrorContextR(
+			r, "could not parse template file",
 			LogContext{
 				"file":  templatePath,
 				"error": err,
 			},
 		)
-		RespondInternalServerError(w)
-		return nil
+		return nil, http.StatusInternalServerError
 	}
 
-	return tmpl
+	return tmpl, http.StatusOK
 }

@@ -35,8 +35,8 @@ func getActionHandlerFunc(actions []ActionSpec) AppRequestHandler {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// determine action
 		actionName := getElementName("actions", r.URL.Path)
-		Log.DebugContext(
-			"handle action",
+		Log.DebugContextR(
+			r, "handle action",
 			LogContext{
 				"name":   actionName,
 				"method": r.Method,
@@ -49,22 +49,14 @@ func getActionHandlerFunc(actions []ActionSpec) AppRequestHandler {
 			return
 		}
 
-		// prepare request processing (URL form data might be empty)
-		err := r.ParseForm()
-		if err != nil {
-			Log.WarnError("could not parse form", err)
-			RespondBadRequest(w)
-			return
-		}
-
 		// CSRF protection
 		if !IsCSRFtokenValid(r, r.Form.Get("csrf")) {
-			Log.Debug("CSRF token mismatch")
+			Log.DebugR(r, "CSRF token mismatch")
 			RespondBadRequest(w)
 			return
 		}
 
-		Log.InfoContext("execute action", LogContext{"name": actionName, "method": r.Method})
+		Log.InfoContextR(r, "execute action", LogContext{"name": actionName, "method": r.Method})
 		handleResponseAction(w, r, actionSpec.Do(w, r))
 	}
 }

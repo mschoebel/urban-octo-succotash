@@ -19,18 +19,25 @@ import (
 func MarkdownHandler() AppRequestHandlerMapping {
 	return AppRequestHandlerMapping{
 		Route:   "/markdown/",
-		Handler: markdownHandler,
+		Handler: markdownWebHandler,
 	}
 }
 
-func markdownHandler(w http.ResponseWriter, r *http.Request) {
+func markdownWebHandler(w http.ResponseWriter, r *http.Request) {
 	// determine markdown element name
-	mdElementName := getElementName("markdown", r.URL.Path)
-	if mdElementName == "" {
+	name := getElementName("markdown", r.URL.Path)
+	if name == "" {
 		RespondNotFound(w)
 		return
 	}
-	mdFilePath := filepath.Join(config.Assets.Markdown, mdElementName)
+
+	if status := markdownHandler(w, r, name); status != http.StatusOK {
+		respondWithStatusText(w, status)
+	}
+}
+
+func markdownHandler(w io.Writer, r *http.Request, name string) int {
+	mdFilePath := filepath.Join(config.Assets.Markdown, name)
 
 	// append ".md" file extension (of not already present)
 	if !strings.HasSuffix(mdFilePath, ".md") {
@@ -41,43 +48,39 @@ func markdownHandler(w http.ResponseWriter, r *http.Request) {
 	info, err := os.Stat(mdFilePath)
 	if err != nil {
 		if os.IsNotExist(err) {
-			Log.WarnContext(
-				"file not found",
+			Log.WarnContextR(
+				r, "file not found",
 				LogContext{"file": mdFilePath},
 			)
-			RespondNotFound(w)
-			return
+			return http.StatusNotFound
 		}
 
-		Log.ErrorContext(
-			"could not os.Stat markdown file",
+		Log.ErrorContextR(
+			r, "could not os.Stat markdown file",
 			LogContext{
 				"file":  mdFilePath,
 				"error": err,
 			},
 		)
-		RespondInternalServerError(w)
-		return
+		return http.StatusInternalServerError
 	}
 
 	// requestes a directory? (trailing slash)
 	if info.IsDir() {
-		RespondNotFound(w)
-		return
+		return http.StatusNotFound
 	}
 
 	// read markdown file
 	md, err := ReadFile(mdFilePath)
 	if err != nil {
-		Log.ErrorContext(
-			"could not read markdown file",
+		Log.ErrorContextR(
+			r, "could not read markdown file",
 			LogContext{
 				"file":  mdFilePath,
 				"error": err,
 			},
 		)
-		RespondInternalServerError(w)
-		return
+		return http.StatusInternalServerError
 	}
 
 	var (
@@ -94,6 +97,8 @@ func markdownHandler(w http.ResponseWriter, r *http.Request) {
 		string(markdown.ToHTML(md, nil, renderer)),
 	)
 	w.Write([]byte(result))
+
+	return http.StatusOK
 }
 
 func renderHook(w io.Writer, node ast.Node, entering bool) (ast.WalkStatus, bool) {

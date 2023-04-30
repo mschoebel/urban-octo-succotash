@@ -71,6 +71,11 @@ func RegisterAppRequestHandlers(handlerList ...AppRequestHandlerMapping) {
 	}
 }
 
+// RegisterAppRequestHandlersList registers a slice of handler.
+func RegisterAppRequestHandlersList(list []AppRequestHandlerMapping) {
+	RegisterAppRequestHandlers(list...)
+}
+
 // RegisterStaticAssetServer provides the given content file system at the specified location.
 func RegisterStaticAssets(route string, content embed.FS) {
 	Log.DebugContext(

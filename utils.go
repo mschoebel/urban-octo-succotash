@@ -11,7 +11,47 @@ import (
 	"strings"
 )
 
+type Getter interface {
+	Get(string) string
+}
+
+type formData map[string]string
+
+func newFormData(url string) formData {
+	if idx := strings.Index(url, "?"); idx >= 0 {
+		url = url[idx+1:]
+	} else {
+		return formData{}
+	}
+
+	result := formData{}
+	for _, arg := range strings.Split(url, "&") {
+		kv := strings.Split(arg, "=")
+		if len(kv) == 2 {
+			result[kv[0]] = kv[1]
+		}
+	}
+
+	return result
+}
+
+func (f formData) Get(key string) string {
+	return f[key]
+}
+
+func getElementBase(urlPath string) string {
+	urlPath = filepath.Clean(urlPath)
+	if len(urlPath) <= 1 {
+		return ""
+	}
+	return strings.Split(urlPath[1:], "/")[0]
+}
+
 func getElementName(prefix, urlPath string) string {
+	if idx := strings.Index(urlPath, "?"); idx >= 0 {
+		urlPath = urlPath[:idx]
+	}
+
 	urlPath = filepath.Clean(urlPath)
 	if !strings.HasPrefix(urlPath, fmt.Sprintf("/%s/", prefix)) {
 		return ""

@@ -8,6 +8,8 @@ require (
 	github.com/gorilla/securecookie v1.1.1
 	github.com/prometheus/client_golang v1.15.0
 	github.com/rs/zerolog v1.29.0
+	github.com/vorlif/spreak v0.4.0
+	golang.org/x/text v0.9.0
 	gorm.io/gorm v1.25.0
 )
 

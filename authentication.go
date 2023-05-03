@@ -65,3 +65,12 @@ func clearSession(w http.ResponseWriter) {
 	}
 	http.SetCookie(w, cookie)
 }
+
+func setLanguage(language string, w http.ResponseWriter) {
+	cookie := &http.Cookie{
+		Name:  "language",
+		Value: language,
+		Path:  "/",
+	}
+	http.SetCookie(w, cookie)
+}

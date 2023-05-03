@@ -27,6 +27,7 @@ func ComponentSetup(configFilePath ...string) {
 	setupMonitoring()
 	setupDataAccess()
 	setupAuthentication()
+	setupInternationalization()
 
 	rand.Seed(time.Now().UnixNano())
 

@@ -48,11 +48,12 @@ func ResponseFormError(message string) *ResponseAction {
 
 // ResponseSetSessionCookie sets a session cookie for the specified user and
 // triggers a full frontend page refresh or a redirect to the given URL.
-func ResponseSetSessionCookie(userID uint) *ResponseAction {
+func ResponseSetSessionCookie(userID uint, language string) *ResponseAction {
 	return &ResponseAction{
 		doPageRefresh: true,
 		callback: func(w http.ResponseWriter) {
 			setSession(userID, w)
+			setLanguage(language, w)
 		},
 	}
 }

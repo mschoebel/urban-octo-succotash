@@ -56,6 +56,15 @@ func hxResolve(r *http.Request, element, method, url, trigger, swap, attributes 
 }
 
 func getTemplateFuncMap(r *http.Request) template.FuncMap {
+	var (
+		lang     = r.Context().Value(ctxClientLanguage).(string)
+		user, ok = r.Context().Value(ctxAppUser).(AppUser)
+	)
+	if ok && user.Language != "" {
+		lang = user.Language
+	}
+	Log.TraceContextR(r, "localize request", LogContext{"lang": lang})
+
 	return template.FuncMap{
 		"loop": func(from, to int) <-chan int {
 			ch := make(chan int)
@@ -71,6 +80,8 @@ func getTemplateFuncMap(r *http.Request) template.FuncMap {
 		"contains":  strings.Contains,
 		"hasPrefix": strings.HasPrefix,
 		"hasSuffix": strings.HasSuffix,
+		"toUpper":   strings.ToUpper,
+		"toLower":   strings.ToLower,
 
 		"inc": func(x int) int { return x + 1 },
 		"dec": func(x int) int { return x - 1 },
@@ -110,6 +121,24 @@ func getTemplateFuncMap(r *http.Request) template.FuncMap {
 				return user.Name
 			}
 
+			return ""
+		},
+
+		"TR": getLocalizer(lang).Tr,
+		"languageSelector": func() template.HTML {
+			var content bytes.Buffer
+			err := renderInternalTemplate(
+				&content, r, "language_selector",
+				map[string]interface{}{
+					"selected":  strings.Split(lang, "-")[0],
+					"languages": config.I18N.Languages,
+				},
+			)
+			if err == nil {
+				return template.HTML(content.String())
+			}
+
+			Log.ErrorObjR(r, "could not render language selector", err)
 			return ""
 		},
 	}

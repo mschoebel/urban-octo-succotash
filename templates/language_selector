@@ -1,0 +1,7 @@
+<div class="select is-small mr-1 ml-1" hx-post="/actions/setLanguage?csrf={{csrf}}" hx-trigger="change" hx-include="#i18n_lang">
+  <select id="i18n_lang" name="lang">
+{{range .languages}}
+    <option value="{{.}}" {{if eq . $.selected}}selected="selected"{{end}}>{{toUpper .}}</option>
+{{end}}
+  </select>
+</div>

@@ -12,7 +12,8 @@ import (
 type AppUser struct {
 	gorm.Model
 
-	Name string `gorm:"unique"`
+	Name     string `gorm:"unique"`
+	Language string
 
 	PasswordHash string
 	Salt         string

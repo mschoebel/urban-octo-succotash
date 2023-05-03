@@ -23,6 +23,7 @@ type AppConfiguration struct {
 	Monitoring MonitoringConfiguration `json:"monitoring"`
 	Database   DBConfiguration         `json:"database"`
 	Assets     AssetConfiguration      `json:"assets"`
+	I18N       I18NConfiguration       `json:"i18n"`
 
 	Auth AuthenticationConfiguration `json:"auth"`
 
@@ -61,6 +62,13 @@ type AssetConfiguration struct {
 	Templates string `json:"templates"`
 	// directory containing markdown documents
 	Markdown string `json:"markdown"`
+}
+
+type I18NConfiguration struct {
+	// directory containing translations (PO files)
+	Locale string `json:"locale"`
+	// list of supported languages (first entry is primary language)
+	Languages []string `json:"languages"`
 }
 
 // AuthenticationConfiguration specifies required keys for cookie handling.

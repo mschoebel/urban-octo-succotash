@@ -25,7 +25,8 @@ func ActionHandler(actions ...ActionSpec) AppRequestHandlerMapping {
 func getActionHandlerFunc(actions []ActionSpec) AppRequestHandler {
 	nameToSpec := map[string]ActionSpec{
 		// pre-defined actions
-		"logout": logoutAction{},
+		"logout":      logoutAction{},
+		"setLanguage": languageAction{},
 	}
 	for _, a := range actions {
 		nameToSpec[a.Name()] = a

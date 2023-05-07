@@ -65,6 +65,14 @@ func getTemplateFuncMap(r *http.Request) template.FuncMap {
 	}
 	Log.TraceContextR(r, "localize request", LogContext{"lang": lang})
 
+	trFunction := func(string, ...interface{}) string {
+		return "-- i18n not configured --"
+	}
+
+	if i18n != nil {
+		trFunction = getLocalizer(lang).Tr
+	}
+
 	return template.FuncMap{
 		"loop": func(from, to int) <-chan int {
 			ch := make(chan int)
@@ -124,7 +132,7 @@ func getTemplateFuncMap(r *http.Request) template.FuncMap {
 			return ""
 		},
 
-		"TR": getLocalizer(lang).Tr,
+		"TR": trFunction,
 		"languageSelector": func() template.HTML {
 			var content bytes.Buffer
 			err := renderInternalTemplate(

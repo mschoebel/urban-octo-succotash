@@ -49,6 +49,10 @@ type wrappedLocalizer struct {
 }
 
 func getLocalizer(lang string) *wrappedLocalizer {
+	if i18n == nil {
+		return nil
+	}
+
 	return &wrappedLocalizer{
 		lang: lang,
 		loc:  spreak.NewLocalizer(i18n, lang),

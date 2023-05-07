@@ -22,6 +22,9 @@ type TableSpec interface {
 	// ModelName returns the name of the underlying DB model. Can return "" to indicate a custom table.
 	// A returned model must be registered (using RegisterDBModels).
 	ModelName() string
+	// ResourceName is required if the table IsExpandable (see display properties). The detail rows
+	// content will be loaded as the specified resource.
+	ResourceName() string
 
 	// LoadData returns the table data according to the specified configuration.
 	LoadData(TableConfiguration) (TableData, error)
@@ -274,7 +277,7 @@ func (c TableConfiguration) isValid() bool {
 // TableFormatFunc describes a table cell visualization function. The input parameter
 // are the row id and a raw value read from the database. The returned value is visualized
 // in the frontend. The return value can contain HTML.
-type TableFormatFunc func(uint, interface{}) interface{}
+type TableFormatFunc func(interface{}, interface{}) interface{}
 
 // TableColumn describes properties of a table column.
 type TableColumn struct {
@@ -309,13 +312,16 @@ type TableDisplayProperties struct {
 	IsSelectable bool
 	// rows can be expanded
 	IsExpandable bool
+	// last column contains buttons
+	HasRowActions bool
 }
 
 type tableRenderContext struct {
 	TableID string
 
-	Data  TableData
-	Count int64
+	Data         TableData
+	DataResource string
+	Count        int64
 
 	Config  TableConfiguration
 	Columns []TableColumn
@@ -327,8 +333,9 @@ type tableRenderContext struct {
 	IsEmpty   bool
 	IsLoading bool
 
-	ColumnWidth  int
-	TableBaseURL string
+	ColumnWidth    int
+	LastDataColumn int
+	TableBaseURL   string
 
 	PageCount int
 }
@@ -364,6 +371,23 @@ func newTableRenderContext(t TableSpec, form url.Values) (tableRenderContext, er
 		return tableRenderContext{}, err
 	}
 
+	// base initialization
+	context := tableRenderContext{
+		TableID:      fmt.Sprintf("%s-%d", t.Name(), rand.Intn(999999)),
+		Data:         data,
+		DataResource: t.ResourceName(),
+		Count:        count,
+		Config:       config,
+		Columns:      columns,
+		Actions:      t.Actions(),
+	}
+
+	// custom display settings available?
+	settingsProvider, ok := t.(TableDisplay)
+	if ok {
+		context.Display = settingsProvider.DisplaySettings()
+	}
+
 	// call formatting functions (if defined)
 	for i, row := range data {
 		for j, cell := range row {
@@ -371,27 +395,15 @@ func newTableRenderContext(t TableSpec, form url.Values) (tableRenderContext, er
 				// first entry contains ID - not shown in table
 				continue
 			}
+			if context.Display.HasRowActions && j == len(row)-1 {
+				// skip last entry - contains action infos, handled in template
+				continue
+			}
 
 			if columns[j-1].Format != nil {
-				data[i][j] = columns[j-1].Format(row[0].(uint), cell)
+				data[i][j] = columns[j-1].Format(row[0], cell)
 			}
 		}
-	}
-
-	// base initialization
-	context := tableRenderContext{
-		TableID: fmt.Sprintf("%s-%d", t.Name(), rand.Intn(999999)),
-		Data:    data,
-		Count:   count,
-		Config:  config,
-		Columns: columns,
-		Actions: t.Actions(),
-	}
-
-	// custom display settings available?
-	settingsProvider, ok := t.(TableDisplay)
-	if ok {
-		context.Display = settingsProvider.DisplaySettings()
 	}
 
 	// evaluate some properties to simplify context handling in template
@@ -407,6 +419,17 @@ func newTableRenderContext(t TableSpec, form url.Values) (tableRenderContext, er
 	if context.Display.IsExpandable {
 		context.ColumnWidth += 1
 	}
+	if context.Display.HasRowActions {
+		context.ColumnWidth += 1
+	}
+	// .. determine index of last data column (exclude action buttons)
+	if !context.IsEmpty {
+		context.LastDataColumn = len(data[0])
+		if context.Display.HasRowActions {
+			context.LastDataColumn -= 1
+		}
+	}
+
 	// .. integrate sorting info in columns info
 	for i, c := range context.Config.Columns {
 		if c == context.Config.SortColumn {
@@ -424,7 +447,9 @@ func newTableRenderContext(t TableSpec, form url.Values) (tableRenderContext, er
 		strings.Join(context.Config.Columns, ","),
 	)
 	// .. calculate overall page count
-	context.PageCount = int(math.Ceil(float64(count) / float64(context.Config.Rows)))
+	if count != -1 {
+		context.PageCount = int(math.Ceil(float64(count) / float64(context.Config.Rows)))
+	}
 
 	return context, nil
 }

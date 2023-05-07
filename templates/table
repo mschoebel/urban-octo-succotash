@@ -20,6 +20,9 @@
         {{.DisplayName}} {{if .IsSortField}}<i class="las la-sort-{{if .IsSortDesc}}down{{else}}up{{end}}" aria-hidden="true"></i>{{end}}
       </th>
 {{end}}
+{{if .Display.HasRowActions}}
+      <th></th>
+{{end}}
     </tr>
   </thead>
   <tbody>
@@ -56,17 +59,32 @@
 {{end}}
 {{range $idx, $entry := .}}
       {{if ne $idx 0}}
+      {{if lt $idx $.LastDataColumn}}
       <td data-label="{{index $.Config.Columns (dec $idx)}}">
         {{$entry}}
       </td>
       {{end}}
+      {{end}}
+{{end}}
+{{if $.Display.HasRowActions}}
+      <td class="is-actions-cell">
+        <div class="buttons is-right">
+          {{$actionRowIndex := index . 0}}
+          {{range (index . $.LastDataColumn)}}
+          <button class="button is-{{.ButtonClass}} is-small mr-2" hx-{{.Method}}="{{.TargetURL}}{{if ne .Method "get"}}&csrf={{csrf}}{{end}}&id={{$actionRowIndex}}" {{if ne .Include ""}}hx-include="{{.Include}}"{{end}} {{if hasPrefix .TargetURL "/dialogs/"}}hx-target="body" hx-swap="beforeend"{{end}}>
+            {{if ne .Icon ""}}<span class="icon"><i class="las la-{{.Icon}}"></i></span>{{end}}
+            {{if ne .Text ""}}<span>{{.Text}}</span>{{end}}
+          </button>
+          {{end}}
+        </div>
+      </td>
 {{end}}
     </tr>
 {{if $.Display.IsExpandable}}
     <tr id="table-{{$.TableID}}-detail-row-{{index . 0}}" class="detail is-hidden" _="on expand toggle .is-hidden on me">
       <td colspan="{{$.ColumnWidth}}">
         <div class="detail-container">
-          <div id="table-{{$.TableID}}-detail-{{index . 0}}" hx-get="/person/{{index . 0}}" hx-trigger="loadDetails" hx-swap="innerHTML"></div>
+          <div id="table-{{$.TableID}}-detail-{{index . 0}}" hx-get="/{{$.DataResource}}/{{index . 0}}" hx-trigger="loadDetails" hx-swap="innerHTML"></div>
         </div>
       </td>
     </tr>

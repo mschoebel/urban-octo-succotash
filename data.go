@@ -89,6 +89,10 @@ func dbColumns(name string) []string {
 }
 
 func dbEntryCount(name string) (int64, error) {
+	if name == "" {
+		return -1, nil
+	}
+
 	var count int64
 	return count, DB.Table(dbModelInfos[name].table).Where("deleted_at IS NULL").Count(&count).Error
 }

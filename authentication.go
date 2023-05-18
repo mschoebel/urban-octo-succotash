@@ -14,12 +14,12 @@ func setupAuthentication() {
 	Log.InfoContext(
 		"initialize authentication",
 		LogContext{
-			"hash":  len(config.Auth.hash),
-			"block": len(config.Auth.block),
+			"hash":  len(Config.Auth.hash),
+			"block": len(Config.Auth.block),
 		},
 	)
 
-	cookieHandler = securecookie.New(config.Auth.hash, config.Auth.block)
+	cookieHandler = securecookie.New(Config.Auth.hash, Config.Auth.block)
 }
 
 type sessionInfo struct {

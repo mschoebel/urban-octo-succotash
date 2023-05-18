@@ -1,6 +1,8 @@
 package uos
 
 import (
+	"bytes"
+	"encoding/gob"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -96,11 +98,35 @@ type PageConfiguration struct {
 	ScriptsBody []string `json:"scripts_body"`
 }
 
+func (pc PageConfiguration) clone() PageConfiguration {
+	var (
+		buf bytes.Buffer
+
+		enc = gob.NewEncoder(&buf)
+		dec = gob.NewDecoder(&buf)
+	)
+
+	err := enc.Encode(pc)
+	if err != nil {
+		Log.ErrorObj("could not clone page configuration (encode)", err)
+		return pc
+	}
+
+	var cloned PageConfiguration
+	err = dec.Decode(&cloned)
+	if err != nil {
+		Log.ErrorObj("could not clone page configuration (decode)", err)
+		return pc
+	}
+
+	return cloned
+}
+
 type TuningConfiguration struct {
 	ActivateHTMXPreloading bool `json:"htmx_preload"`
 }
 
-var config = AppConfiguration{}
+var Config = AppConfiguration{}
 
 func readConfiguration(configFilePath string) error {
 	configFileContent, err := os.ReadFile(configFilePath)
@@ -108,31 +134,31 @@ func readConfiguration(configFilePath string) error {
 		return err
 	}
 
-	err = json.Unmarshal(configFileContent, &config)
+	err = json.Unmarshal(configFileContent, &Config)
 	if err != nil {
 		return err
 	}
 
 	// check/create authentification info
-	if len(config.Auth.HashKey) == 0 {
-		config.Auth.HashKey = randomString(64)
-		fmt.Printf("generated  hash key: %s\n", config.Auth.HashKey)
+	if len(Config.Auth.HashKey) == 0 {
+		Config.Auth.HashKey = randomString(64)
+		fmt.Printf("generated  hash key: %s\n", Config.Auth.HashKey)
 	}
-	if len(config.Auth.BlockKey) == 0 {
-		config.Auth.BlockKey = randomString(32)
-		fmt.Printf("generated block key: %s\n", config.Auth.BlockKey)
+	if len(Config.Auth.BlockKey) == 0 {
+		Config.Auth.BlockKey = randomString(32)
+		fmt.Printf("generated block key: %s\n", Config.Auth.BlockKey)
 	}
 
-	config.Auth.hash = []byte(config.Auth.HashKey)
-	config.Auth.block = []byte(config.Auth.BlockKey)
+	Config.Auth.hash = []byte(Config.Auth.HashKey)
+	Config.Auth.block = []byte(Config.Auth.BlockKey)
 
 	// determine base directory
-	if config.BaseDir == "" {
+	if Config.BaseDir == "" {
 		exePath, err := os.Executable()
 		if err != nil {
 			return err
 		}
-		config.BaseDir, err = filepath.Abs(exePath)
+		Config.BaseDir, err = filepath.Abs(exePath)
 		if err != nil {
 			return err
 		}
@@ -143,7 +169,7 @@ func readConfiguration(configFilePath string) error {
 
 func (c AppConfiguration) getPageConfig(pageName string) PageConfiguration {
 	var (
-		result     = c.Pages["_default"]
+		result     = c.Pages["_default"].clone()
 		pageConfig = c.Pages[pageName]
 	)
 

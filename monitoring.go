@@ -12,7 +12,7 @@ import (
 )
 
 func setupMonitoring() {
-	if config.Monitoring.PortPPROF > 0 {
+	if Config.Monitoring.PortPPROF > 0 {
 		go func() {
 			Log.Info("starting PPROF web interface")
 			pprofMux := http.NewServeMux()
@@ -23,14 +23,14 @@ func setupMonitoring() {
 			pprofMux.HandleFunc("/debug/pprof/symbol", pprof.Symbol)
 			pprofMux.HandleFunc("/debug/pprof/trace", pprof.Trace)
 
-			err := http.ListenAndServe(fmt.Sprintf(":%d", config.Monitoring.PortPPROF), pprofMux)
+			err := http.ListenAndServe(fmt.Sprintf(":%d", Config.Monitoring.PortPPROF), pprofMux)
 			if err != nil {
 				Log.ErrorObj("profiling web interface stopped", err)
 			}
 		}()
 	}
 
-	if config.Monitoring.PortMetrics > 0 {
+	if Config.Monitoring.PortMetrics > 0 {
 		// initialize metrics registry
 		Metrics = newMetricsRegistry()
 
@@ -40,7 +40,7 @@ func setupMonitoring() {
 
 			metricsMux.Handle("/metrics", promhttp.Handler())
 
-			err := http.ListenAndServe(fmt.Sprintf(":%d", config.Monitoring.PortMetrics), metricsMux)
+			err := http.ListenAndServe(fmt.Sprintf(":%d", Config.Monitoring.PortMetrics), metricsMux)
 			if err != nil {
 				Log.ErrorObj("profiling web interface stopped", err)
 			}

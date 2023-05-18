@@ -8,17 +8,17 @@ import (
 var i18n *spreak.Bundle
 
 func setupInternationalization() {
-	if config.I18N.Locale == "" {
+	if Config.I18N.Locale == "" {
 		Log.Info("no locale specified - skip i18n initialization")
 		return
 	}
-	if len(config.I18N.Languages) == 0 {
+	if len(Config.I18N.Languages) == 0 {
 		Log.Info("no languages specified - skip i18n initialization")
 		return
 	}
 
-	langCodes := make([]interface{}, len(config.I18N.Languages))
-	for i, langConfig := range config.I18N.Languages {
+	langCodes := make([]interface{}, len(Config.I18N.Languages))
+	for i, langConfig := range Config.I18N.Languages {
 		code, err := language.Parse(langConfig)
 		if err != nil {
 			Log.PanicContext(
@@ -33,7 +33,7 @@ func setupInternationalization() {
 	Log.Info("initialize i18n")
 	bundle, err := spreak.NewBundle(
 		spreak.WithSourceLanguage(langCodes[0].(language.Tag)),
-		spreak.WithDomainPath(spreak.NoDomain, config.I18N.Locale),
+		spreak.WithDomainPath(spreak.NoDomain, Config.I18N.Locale),
 		spreak.WithLanguage(langCodes[1:]...),
 	)
 	if err != nil {

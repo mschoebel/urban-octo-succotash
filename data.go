@@ -15,10 +15,10 @@ import (
 var DB *gorm.DB
 
 func setupDataAccess() {
-	Log.InfoContext("open SQLite database file", LogContext{"file": config.Database.File})
+	Log.InfoContext("open SQLite database file", LogContext{"file": Config.Database.File})
 
 	dbAccess, err := gorm.Open(
-		sqlite.Open(config.Database.File),
+		sqlite.Open(Config.Database.File),
 		&gorm.Config{
 			Logger: logger.Default.LogMode(logger.Silent),
 		},

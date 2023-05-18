@@ -148,9 +148,9 @@ func ReadFile(path string) ([]byte, error) {
 
 	Log.TraceContext(
 		"base directory check",
-		LogContext{"base": config.BaseDir, "file": absPath},
+		LogContext{"base": Config.BaseDir, "file": absPath},
 	)
-	if !strings.HasPrefix(absPath, config.BaseDir+string(filepath.Separator)) {
+	if !strings.HasPrefix(absPath, Config.BaseDir+string(filepath.Separator)) {
 		return nil, fmt.Errorf("path outside of base directory")
 	}
 

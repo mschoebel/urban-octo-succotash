@@ -19,11 +19,11 @@ var Log *internalLogger
 func setupLogging() {
 	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
 
-	if config.Logging.UseConsole {
+	if Config.Logging.UseConsole {
 		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
 	}
 
-	switch config.Logging.Level {
+	switch Config.Logging.Level {
 	case "panic":
 		zerolog.SetGlobalLevel(zerolog.PanicLevel)
 	case "fatal":

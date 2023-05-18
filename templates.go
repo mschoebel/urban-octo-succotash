@@ -12,7 +12,7 @@ import (
 )
 
 func hxResolve(r *http.Request, element, method, url, trigger, swap, attributes string) template.HTML {
-	if config.Tuning.ActivateHTMXPreloading && method == "get" && trigger == "load" {
+	if Config.Tuning.ActivateHTMXPreloading && method == "get" && trigger == "load" {
 		var (
 			itemType = getElementBase(url)
 			itemName = getElementName(itemType, url)
@@ -109,7 +109,7 @@ func getTemplateFuncMap(r *http.Request) template.FuncMap {
 		},
 
 		"app": func(key string) interface{} {
-			if info, ok := config.AppInfo[key]; ok {
+			if info, ok := Config.AppInfo[key]; ok {
 				return info
 			}
 			return ""
@@ -139,7 +139,7 @@ func getTemplateFuncMap(r *http.Request) template.FuncMap {
 				&content, r, "language_selector",
 				map[string]interface{}{
 					"selected":  strings.Split(lang, "-")[0],
-					"languages": config.I18N.Languages,
+					"languages": Config.I18N.Languages,
 				},
 			)
 			if err == nil {
@@ -163,7 +163,7 @@ func renderTemplate(
 	data interface{},
 	templateName string,
 ) error {
-	templateFile, err := ReadFile(filepath.Join(config.Assets.Templates, templateName))
+	templateFile, err := ReadFile(filepath.Join(Config.Assets.Templates, templateName))
 	if err != nil {
 		return err
 	}
@@ -203,7 +203,7 @@ func loadTemplate(
 	name,
 	templateName string,
 ) (*template.Template, int) {
-	templatePath := filepath.Join(config.Assets.Templates, templateName)
+	templatePath := filepath.Join(Config.Assets.Templates, templateName)
 
 	// template not found?
 	info, err := os.Stat(templatePath)

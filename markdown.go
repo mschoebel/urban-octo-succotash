@@ -37,7 +37,7 @@ func markdownWebHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func markdownHandler(w io.Writer, r *http.Request, name string) int {
-	mdFilePath := filepath.Join(config.Assets.Markdown, name)
+	mdFilePath := filepath.Join(Config.Assets.Markdown, name)
 
 	// append ".md" file extension (of not already present)
 	if !strings.HasSuffix(mdFilePath, ".md") {

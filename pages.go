@@ -48,6 +48,16 @@ func PageHandler(page ...string) AppRequestHandlerMapping {
 	}
 }
 
+type PageConfigurationHandler func(string, *http.Request, *PageConfiguration)
+
+var pageConfigCB = func(string, *http.Request, *PageConfiguration) {
+	Log.Trace("default page configuration handler")
+}
+
+func RegisterPageConfigurationHook(cb PageConfigurationHandler) {
+	pageConfigCB = cb
+}
+
 // renderPage loads the base page template and the content template with the specified name
 // and writes the combined result to the specified writer using the given data context.
 func renderPage(w http.ResponseWriter, r *http.Request, name string, data map[string]interface{}) {
@@ -69,8 +79,12 @@ func renderPage(w http.ResponseWriter, r *http.Request, name string, data map[st
 	if data == nil {
 		data = map[string]interface{}{}
 	}
+	// .. content
 	data["Content"] = template.HTML(content.String())
-	data["Page"] = config.getPageConfig(name)
+	// .. base configuration (title, scripts, styles, ...)
+	pageConfig := Config.getPageConfig(name)
+	pageConfigCB(name, r, &pageConfig)
+	data["Page"] = pageConfig
 
 	err = renderInternalTemplate(w, r, "page", data)
 	if err != nil {

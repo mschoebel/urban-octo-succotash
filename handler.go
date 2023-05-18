@@ -76,11 +76,23 @@ func RegisterAppRequestHandlersList(list []AppRequestHandlerMapping) {
 	RegisterAppRequestHandlers(list...)
 }
 
-// RegisterStaticAssetServer provides the given content file system at the specified location.
+// RegisterStaticAssets provides the given content file system at the specified location.
 func RegisterStaticAssets(route string, content embed.FS) {
 	Log.DebugContext(
 		"register static assets server",
 		LogContext{"route": route},
 	)
 	appMux.Handle(route, http.FileServer(http.FS(content)))
+}
+
+// RegisterDynamicAssets provides the configured dynamic asset directory at the specified location.
+func RegisterDynamicAssets(route string) {
+	Log.DebugContext(
+		"register dynamic assets server",
+		LogContext{"route": route, "base": Config.Assets.Dynamic},
+	)
+	appMux.Handle(
+		route,
+		http.StripPrefix(route, http.FileServer(http.Dir(Config.Assets.Dynamic))),
+	)
 }

@@ -60,6 +60,8 @@ type DBConfiguration struct {
 
 // AssetConfiguration specifies directories containing different types of static data.
 type AssetConfiguration struct {
+	// directory containing "dynamic" assets (= assets that are not included in the executable)
+	Dynamic string `json:"dynamic"`
 	// directory containing template files for pages, forms, dialogs, fragements.
 	Templates string `json:"templates"`
 	// directory containing markdown documents

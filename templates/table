@@ -101,7 +101,7 @@
     <div class="level-item">
 {{if .HasActions}}
 {{range .Actions}}
-      <button class="button is-{{.ButtonClass}} is-small mr-2" hx-{{.Method}}="{{.TargetURL}}{{if ne .Method "get"}}&csrf={{csrf}}{{end}}" {{if ne .Include ""}}hx-include="{{.Include}}"{{end}} {{if hasPrefix .TargetURL "/dialogs/"}}hx-target="body" hx-swap="beforeend"{{end}}>
+      <button class="button is-{{.ButtonClass}} is-small mr-2" hx-{{.Method}}="{{.TargetURL}}{{if ne .Method "get"}}&csrf={{csrf}}{{end}}" {{if ne .Include ""}}hx-include="{{.Include}}"{{end}} {{if hasPrefix .TargetURL "/dialogs/"}}hx-target="body" hx-swap="beforeend"{{end}} {{if ne .ConfirmationTitle ""}}_="on htmx:confirm(issueRequest) halt the event then trigger confirmDlg(req:issueRequest, title:'{{.ConfirmationTitle}}', msg:'{{.ConfirmationMessage}}') on #modal-confirm"{{end}}>
         {{if ne .Icon ""}}<span class="icon"><i class="las la-{{.Icon}}"></i></span>{{end}}
         {{if ne .Text ""}}<span>{{.Text}}</span>{{end}}
       </button>

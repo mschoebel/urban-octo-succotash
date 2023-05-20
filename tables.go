@@ -66,6 +66,11 @@ type TableAction struct {
 	TargetURL string
 	// CSS selector for elements to include in the resulting request
 	Include string
+
+	// confirmation dialog title, empty: no confirmation required
+	ConfirmationTitle string
+	// confirmation dialog message
+	ConfirmationMessage string
 }
 
 // TableActionButton returns a table action element with the specified icon, text and button class.
@@ -84,11 +89,18 @@ func (a TableAction) Dialog(target string) TableAction {
 	return a
 }
 
-// Dialog extends the action to open the specified dialog
+// Post adds a HTMX post action to the element
 func (a TableAction) Post(target, include string) TableAction {
 	a.Method = "post"
 	a.TargetURL = target
 	a.Include = include
+	return a
+}
+
+// Confirmation asks for user permission before sending the action
+func (a TableAction) Confirmation(title, message string) TableAction {
+	a.ConfirmationTitle = title
+	a.ConfirmationMessage = message
 	return a
 }
 

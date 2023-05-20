@@ -25,6 +25,30 @@
         {{.Content}}
     </div>
 
+    <div id="modal-confirm" class="modal"
+         _="on confirmDlg(req,title,msg) set #confirm-title.innerText to title then
+                                         set #confirm-msg.innerText to msg then
+                                         add .is-active
+                                         then wait for userResponse(result) then
+                                         remove .is-active from me then
+                                         if result.detail.r req()">
+        <div class="modal-background"></div>
+        <div class="modal-card">
+            <header class="modal-card-head">
+                <p id="confirm-title" class="modal-card-title"></p>
+            </header>
+            <section class="modal-card-body">
+                <p id="confirm-msg"></p>
+            </section>
+            <footer class="modal-card-foot is-block">
+                <span class="is-pulled-right">
+                    <button class="button is-white is-small form-button" _="on click trigger userResponse(r:false) on #modal-confirm">Cancel</button>
+                    <button class="button is-primary is-small form-button" _="on click trigger userResponse(r:true) on #modal-confirm">Continue</button>
+                </span>
+            </footer>
+        </div>
+    </div>
+
     {{range .Page.ScriptsBody}}
     <script src="{{if not (hasPrefix . "http")}}{{if not (hasPrefix . "/")}}{{$.Page.StaticBaseURL}}{{end}}{{end}}{{.}}"></script>
     {{end}}

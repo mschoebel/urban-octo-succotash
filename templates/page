@@ -8,6 +8,11 @@
     {{if .Page.Description}}<meta name="description" content="{{.Page.Description}}">{{end}}
     {{if .Page.Author}}<meta name="author" content="{{.Page.Author}}">{{end}}
 
+    <meta property="og:title" content="{{.Page.Title}}">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{.Page.URL}}">
+    <meta property="og:description" content="{{.Page.Description}}">
+
     {{if .Page.FavIcon}}
     <link rel="icon" href="{{.Page.StaticBaseURL}}{{.Page.FavIcon}}" type="image/x-icon"/>
     <link rel="shortcut icon" href="{{.Page.StaticBaseURL}}{{.Page.FavIcon}}" type="image/x-icon"/>
@@ -25,6 +30,7 @@
         {{.Content}}
     </div>
 
+    {{if .Features.Dialog}}
     <div id="modal-confirm" class="modal"
          _="on confirmDlg(req,title,msg) set #confirm-title.innerText to title then
                                          set #confirm-msg.innerText to msg then
@@ -48,6 +54,7 @@
             </footer>
         </div>
     </div>
+    {{end}}
 
     {{range .Page.ScriptsBody}}
     <script src="{{if not (hasPrefix . "http")}}{{if not (hasPrefix . "/")}}{{$.Page.StaticBaseURL}}{{end}}{{end}}{{.}}"></script>

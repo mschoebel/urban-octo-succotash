@@ -85,6 +85,7 @@ func renderPage(w http.ResponseWriter, r *http.Request, name string, data map[st
 	pageConfig := Config.getPageConfig(name)
 	pageConfigCB(name, r, &pageConfig)
 	data["Page"] = pageConfig
+	data["Features"] = Config.Features
 
 	err = renderInternalTemplate(w, r, "page", data)
 	if err != nil {

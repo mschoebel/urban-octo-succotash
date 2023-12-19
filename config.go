@@ -33,7 +33,8 @@ type AppConfiguration struct {
 	// the page "_default" can be specified.
 	Pages map[string]PageConfiguration `json:"pages"`
 
-	Tuning TuningConfiguration `json:"tuning"`
+	Tuning   TuningConfiguration  `json:"tuning"`
+	Features FeatureConfiguration `json:"-"`
 }
 
 // LogConfiguration specifies logging behaviour.
@@ -89,6 +90,7 @@ type PageConfiguration struct {
 	Title       string `json:"title"`
 	Description string `json:"description"`
 	Author      string `json:"author"`
+	URL         string `json:"url"`
 
 	StaticBaseURL string `json:"static_base_url"`
 
@@ -126,6 +128,10 @@ func (pc PageConfiguration) clone() PageConfiguration {
 
 type TuningConfiguration struct {
 	ActivateHTMXPreloading bool `json:"htmx_preload"`
+}
+
+type FeatureConfiguration struct {
+	Dialogs bool `json:"-"`
 }
 
 var Config = AppConfiguration{}

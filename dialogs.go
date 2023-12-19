@@ -81,6 +81,8 @@ func (fe DialogFooterElement) Saving(form string) DialogFooterElement {
 // DialogHandler returns a handler for the "/dialogs/" route providing the specified dialogs.
 // The handler can be activated using RegisterAppRequestHandlers.
 func DialogHandler(dialogs ...DialogSpec) AppRequestHandlerMapping {
+	Config.Features.Dialogs = true
+
 	return AppRequestHandlerMapping{
 		Route:   "/dialogs/",
 		Handler: getDialogHandlerFunc(dialogs),

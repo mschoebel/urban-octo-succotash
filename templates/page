@@ -30,7 +30,7 @@
         {{.Content}}
     </div>
 
-    {{if .Features.Dialog}}
+    {{if .Features.Dialogs}}
     <div id="modal-confirm" class="modal"
          _="on confirmDlg(req,title,msg) set #confirm-title.innerText to title then
                                          set #confirm-msg.innerText to msg then

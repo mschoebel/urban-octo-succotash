@@ -191,6 +191,9 @@ func (c AppConfiguration) getPageConfig(pageName string) PageConfiguration {
 	if pageConfig.Author != "" {
 		result.Author = pageConfig.Author
 	}
+	if pageConfig.URL != "" {
+		result.URL = pageConfig.URL
+	}
 	if pageConfig.StaticBaseURL != "" {
 		result.StaticBaseURL = pageConfig.StaticBaseURL
 	}

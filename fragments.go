@@ -25,6 +25,9 @@ func FragmentHandler(fragments ...FragmentSpec) AppRequestHandlerMapping {
 	return AppRequestHandlerMapping{
 		Route:   "/fragments/",
 		Handler: getFragmentWebHandlerFunc(fragments),
+		Options: AppRequestHandlerOptions{
+			NoSitemap: true,
+		},
 	}
 }
 

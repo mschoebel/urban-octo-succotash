@@ -12,6 +12,8 @@ type AppRequestHandler func(http.ResponseWriter, *http.Request)
 type AppRequestHandlerOptions struct {
 	// do not expect valid CSRF token on POST/PUT/DELETE
 	NoCSRFcheck bool
+	// do not include the page in sitemap
+	NoSitemap bool
 
 	// redirect to login page if not authenticated
 	IsAuthRequired bool
@@ -41,6 +43,11 @@ func (hm AppRequestHandlerMapping) AuthPage() AppRequestHandlerMapping {
 	return hm
 }
 
+func (hm AppRequestHandlerMapping) NoSitemap() AppRequestHandlerMapping {
+	hm.Options.NoSitemap = true
+	return hm
+}
+
 // RegisterAppRequestHandler registers the given handler for a specific URL pattern/path.
 func RegisterAppRequestHandler(pattern string, handler AppRequestHandler, options AppRequestHandlerOptions) {
 	Log.DebugContext("register request handler", LogContext{"pattern": pattern})
@@ -56,6 +63,8 @@ func RegisterAppRequestHandler(pattern string, handler AppRequestHandler, option
 		authenticationPageURL = pattern
 		Log.InfoContext("registered auth page", LogContext{"url": authenticationPageURL})
 	}
+
+	sitemap.addToSitemap(pattern, !options.NoSitemap)
 
 	appMux.Handle(pattern, mwWrapF(handler, options))
 }

@@ -112,6 +112,9 @@ func TableHandler(tables ...TableSpec) AppRequestHandlerMapping {
 	return AppRequestHandlerMapping{
 		Route:   "/tables/",
 		Handler: getTableHandlerFunc(tables),
+		Options: AppRequestHandlerOptions{
+			NoSitemap: true,
+		},
 	}
 }
 

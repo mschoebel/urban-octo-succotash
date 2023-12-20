@@ -86,6 +86,9 @@ func DialogHandler(dialogs ...DialogSpec) AppRequestHandlerMapping {
 	return AppRequestHandlerMapping{
 		Route:   "/dialogs/",
 		Handler: getDialogHandlerFunc(dialogs),
+		Options: AppRequestHandlerOptions{
+			NoSitemap: true,
+		},
 	}
 }
 

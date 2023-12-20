@@ -13,6 +13,8 @@ var appMux = http.NewServeMux()
 func StartApp() {
 	Log.InfoContext("start listening", LogContext{"port": Config.Port})
 
+	setupSitemapHandler()
+
 	err := http.ListenAndServe(fmt.Sprintf(":%d", Config.Port), appMux)
 	if err != nil {
 		Log.PanicError("application error", err)

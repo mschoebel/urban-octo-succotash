@@ -20,6 +20,9 @@ func MarkdownHandler() AppRequestHandlerMapping {
 	return AppRequestHandlerMapping{
 		Route:   "/markdown/",
 		Handler: markdownWebHandler,
+		Options: AppRequestHandlerOptions{
+			NoSitemap: true,
+		},
 	}
 }
 

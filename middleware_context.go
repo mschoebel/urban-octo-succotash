@@ -14,9 +14,12 @@ const (
 func mwContext(next http.Handler) http.Handler {
 	return http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
+			// determine session request ID
+			sid := analytics.add(r)
+
 			// setup context for request handling
-			// .. create random request ID
-			ctx := context.WithValue(r.Context(), ctxRequestID, randomString(8))
+			// .. add session ID
+			ctx := context.WithValue(r.Context(), ctxRequestID, sid)
 
 			// .. get client language
 			language := strings.Split(r.Header.Get("Accept-Language"), ",")[0]

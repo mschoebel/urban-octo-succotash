@@ -6,6 +6,7 @@ require (
 	github.com/glebarez/sqlite v1.8.0
 	github.com/gomarkdown/markdown v0.0.0-20230322041520-c84983bdbf2a
 	github.com/gorilla/securecookie v1.1.1
+	github.com/mileusna/useragent v1.3.4
 	github.com/prometheus/client_golang v1.15.0
 	github.com/rs/zerolog v1.29.0
 	github.com/vorlif/spreak v0.4.0

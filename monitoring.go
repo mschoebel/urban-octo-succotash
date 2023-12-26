@@ -68,6 +68,8 @@ var (
 	mRequestFailed   int
 	mRequestSlow     int
 
+	mActiveSessions int
+
 	mLogMessage        int
 	mLogMessageWarning int
 	mLogMessageError   int
@@ -108,6 +110,10 @@ func newMetricsRegistry() *metricsRegistry {
 	mRequestActive = registry.RegisterGauge(
 		"app_http_requests_active_count",
 		"Current number of active HTTP request.",
+	)
+	mActiveSessions = registry.RegisterGauge(
+		"app_active_sessions_count",
+		"Current number of active client sessions request.",
 	)
 
 	mLogMessage = registry.RegisterCounter(

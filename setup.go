@@ -24,6 +24,7 @@ func ComponentSetup(configFilePath ...string) {
 	}
 
 	setupLogging()
+	setupAnalytics()
 	setupMonitoring()
 	setupDataAccess()
 	setupAuthentication()
@@ -40,4 +41,5 @@ func ComponentCleanup() {
 	Log.Info("framework cleanup")
 
 	cleanupDataAccess()
+	cleanupAnalytics()
 }

@@ -34,7 +34,7 @@ type AppConfiguration struct {
 	Pages map[string]PageConfiguration `json:"pages"`
 
 	Tuning   TuningConfiguration  `json:"tuning"`
-	Features FeatureConfiguration `json:"-"`
+	Features FeatureConfiguration `json:"features"`
 }
 
 // LogConfiguration specifies logging behaviour.
@@ -131,7 +131,8 @@ type TuningConfiguration struct {
 }
 
 type FeatureConfiguration struct {
-	Dialogs bool `json:"-"`
+	Dialogs   bool   `json:"-"`
+	Analytics string `json:"analytics"`
 }
 
 var Config = AppConfiguration{}
